@@ -1,1408 +1,1280 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASM School Timetable</title>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
- 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
- 
-    <style>
-/* Logo Style */
-.logo-img {
-    max-width: 80px; /* Limit the logo size */
-    margin-bottom: 1px; /* Space between logo and text */
-}
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 3px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        .assigned {
-            background-color: #e0ffe0; /* Highlight assigned cells */
-        }
-        .blinking {
-            animation: blink-animation 1s steps(5, start) infinite;
-        }
-h1 {
-    border: 2px solid black; /* Add a black border */
-    padding: 10px; /* Add some padding for better appearance */
-    border-radius: 5px; /* Optional: Add rounded corners */
-    text-align: center; /* Center align text */
-}
-   /* Buttons */
-        .button, button, .btn {
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-.header-title {
-    border: 2px solid black; /* Add a black border */
-    padding: 10px; /* Add padding */
-    border-radius: 5px; /* Optional: Rounded corners */
-}
-/* Highlighted labels */
-label[for="daySelect"],
-label[for="teacherSelect"],
-label[for="timeSelect"] {
-    font-weight: bold;  /* Make text bold */
-    color: #FFFFFF;  /* White text color */
-    background-color: #2196F3;  /* Blue background color */
-    padding: 5px;  /* Add padding around text */
-    border-radius: 5px;  /* Round the corners */
-    display: inline-block;  /* Make it an inline block to apply padding and border radius */
-    margin-right: 10px;  /* Add spacing between labels */
-}
-/* Highlight the break, lunch, and games time slots */
-td.break, td.lunch, td.games {
-    background-color: #FFEB3B; /* Yellow background for breaks, lunch, and games */
-    color: #000; /* Black text for better readability */
-    font-weight: bold; /* Make the text bold */
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <title>Smart Master Timetable</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  #loginSection {
+    display: block;
+    text-align: center;
+    margin: auto;
+    margin-top: 50px;
+    width: 300px;
+    padding: 20px;
+    border: 2px solid #2196F3;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #4CAF50; /* Green */
 }
 
-/* Optionally, you can add a specific border to highlight these cells */
-td.break, td.lunch, td.games {
-    border: 2px solid #FFC107; /* Border color to distinguish the highlighted cells */
-}
-
-#loginSection {
-        display: block;
-        text-align: center;
-        margin: auto;
-        margin-top: 50px;
-        width: 300px; /* Reduce width */
-        padding: 20px; /* Add some padding for spacing */
-        border: 2px solid #2196F3; /* Add a border for a clean look */
-        border-radius: 10px; /* Round the corners */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
-        background-color: #e3f2fd; /* Light blue background */
- }
     #loginSection input[type="text"],
     #loginSection input[type="password"] {
-        width: calc(100% - 20px); /* Adjust input width */
+        width: calc(100% - 20px);
         padding: 8px;
         margin: 10px 0;
         border: 1px solid #ccc;
         border-radius: 5px;
     }
-footer {
-    position: sticky;
-    bottom: 0;
-    width: 150%;
-    background-color: #FFC107; /* Highlight color (yellow) */
-    color: #000; /* Black text for contrast */
-    text-align: center;
-    padding: 15px; /* Increased padding for better visibility */
-    font-size: 12px; /* Slightly larger font size */
-    font-weight: bold; /* Emphasize the text */
-    border-top: 4px solid #FF5722; /* Add a bold top border for distinction */
-    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for a lifted look */
-}
-
     #loginSection button {
-        width: 100%; /* Full-width button */
+        width: 100%;
         padding: 10px;
         font-size: 14px;
-        background-color: #4CAF50; /* Green color */
+        background-color: #4CAF50;
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
     }
-        @keyframes blink-animation {
-            to {
-                visibility: hidden;
-            }
-        }
+    input, select, button {
+      margin: 5px;
+      padding: 5px;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .timetable-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 4px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .hidden { display: none; }
 
-        /* Button styles */
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            margin: 5px;
-        }
-        .btn-register {
-            background-color: green;
-        }
-        .btn-print {
-            background-color: blue;
-        }
-        .btn-close {
-            background-color: red;
-        }
-    </style>
+   footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #FFC107;
+  color: #000;
+  text-align: center;
+  padding: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  border-top: 4px solid #FF5722;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+ 
+  </style>
 </head>
 <body>
 <!-- Login Section -->
- <div class="logo">
-        <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" class="logo-img">
-    </div>
-    <div id="loginSection">
-        <h1 style="color: blue;">RASM School Timetable Generator</h1>
-        <label for="username">Username:</label>
-        <input type="text" id="username" placeholder="Enter Username">
-        <label for="password">Password:</label>
-        <input type="password" id="password" placeholder="Enter Password">
-       <button class="btn btn-register" onclick="login()">
-    <i class="fas fa-sign-in-alt"></i> Login
-</button>
-
-    </div>
-
-    <!-- Main Content Section (Hidden by default) -->
-    <div id="mainContent" style="display: none;">
-        <h1 style="color: blue;">RASM School Timetable Generator</h1>
-        <h2 style="color: blue;">Welcome</h2>
-        <div>
-            <label for="schoolName">Name of School:</label>
-            <input type="text" id="schoolName" placeholder="Enter School Name">
-            <label for="term">Term:</label>
-            <input type="text" id="term" placeholder="Enter Term">
-            <label for="date">Date:</label>
-            <input type="date" id="date">
-        </div>
-
-        <label for="gradeSelect">Select Grade:</label>
-        <select id="gradeSelect" onchange="showSubjectSelector()">
-            <option value="">--Select--</option>
-            <option value="Grade 1A">Grade 1A</option>
-            <option value="Grade 1B">Grade 1B</option>
-            <option value="Grade 2A">Grade 2A</option>
-            <option value="Grade 2B">Grade 2B</option>
-            <option value="Grade 3A">Grade 3A</option>
-            <option value="Grade 3B">Grade 3B</option>
-            <option value="Grade 4">Grade 4</option>
-            <option value="Grade 4A">Grade 4A</option>
-            <option value="Grade 4B">Grade 4B</option>
-            <option value="Grade 4C">Grade 4C</option>
-            <option value="Grade 4D">Grade 4D</option>
-            <option value="Grade 5A">Grade 5A</option>
-            <option value="Grade 5B">Grade 5B</option>
-            <option value="Grade 5C">Grade 5C</option>
-            <option value="Grade 5D">Grade 5D</option>
-            <option value="Grade 6A">Grade 6A</option>
-            <option value="Grade 6B">Grade 6B</option>
-            <option value="Grade 6C">Grade 6C</option>
-            <option value="Grade 6D">Grade 6D</option>
-            <option value="Grade 7">Grade 7</option>
-            <option value="Grade 7A">Grade 7A</option>
-            <option value="Grade 7B">Grade 7B</option>
-            <option value="Grade 7C">Grade 7C</option>
-            <option value="Grade 7D">Grade 7D</option>
-            <option value="Grade 8">Grade 8</option>
-            <option value="Grade 8A">Grade 8A</option>
-            <option value="Grade 8B">Grade 8B</option>
-            <option value="Grade 8C">Grade 8C</option>
-            <option value="Grade 8D">Grade 8D</option>
-            <option value="Grade 9">Grade 9</option>
-            <option value="Grade 9A">Grade 9A</option>
-            <option value="Grade 9B">Grade 9B</option>
-            <option value="Grade 9C">Grade 9C</option>
-            <option value="Grade 9D">Grade 9D</option>
-            <option value="Grade 10">Grade 10</option>
-            <option value="Grade 10A">Grade 10A</option>
-            <option value="Grade 10B">Grade 10B</option>
-            <option value="Grade 11">Grade 11</option>
-            <option value="Grade 11A">Grade 11A</option>
-            <option value="Grade 11B">Grade 11B</option>
-            <option value="Grade 12">Grade 12</option>
-            <option value="Grade 12A">Grade 12A</option>
-            <option value="Grade 12B">Grade 12B</option>
-        </select>
-
-        <div id="newSubjectSection">
-            <label for="newSubjectName">New Subject:</label>
-            <input type="text" id="newSubjectName" placeholder="Enter Subject Name">
-            <label for="gradeRangeSelect">Grade Range:</label>
-            <select id="gradeRangeSelect">
-                <option value="">Select Grade Range</option>
-                <option value="1-3">Grade 1-3</option>
-                <option value="4-6">Grade 4-6</option>
-                <option value="7-9">Grade 7-9</option>
-                <option value="10-12">Grade 10-12</option>
-            </select>
-           <button class="btn btn-register" onclick="addNewSubject()">
-    <i class="fas fa-book"></i> Add Subject
-</button>
-
-        </div>
-
-        <div id="teacherRegistration">
-            <h3 teacherRegistration="blinking" style="color: red;">Register a New Teacher</h1>
-            <label for="newTeacherName">Teacher Name:</label>
-            <input type="text" id="newTeacherName" placeholder="Enter Teacher's Name">
-           <button class="btn btn-register" onclick="registerTeacher()">
-    <i class="fas fa-chalkboard-teacher"></i> Register Teacher
-</button>
-<button class="btn btn-print" onclick="printTimetable()">
-    <i class="fas fa-print"></i> Print Timetable
-</button>
-<button class="btn btn-print" onclick="downloadTimetablePDF()">
-    <i class="fas fa-file-pdf"></i> Download Timetable as PDF
-</button>
-
-        </div>
-
-        <div id="subjectSelector" style="display: none;">
-            <h1 style="color: red;">Select Subjects</h1>
-            <div id="subjectList"></div>
-            <label for="daySelect">Select Day:</label>
-            <select id="daySelect">
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-            </select>
-            <label for="teacherSelect">Select Teacher:</label>
-            <select id="teacherSelect">
-                <option value="">Select Teacher</option>
-            </select>
-            <label for="timeSelect">Select Time:</label>
-            <select id="timeSelect">
-                <option value="8:00-8:40">8:00-8:40</option>
-                <option value="8:40-9:20">8:40-9:20</option>
-                <option value="9:20-9:50">9:20-9:50 AM Break</option>
-                <option value="9:50-10:30">9:50-10:30</option>
-                <option value="10:30-11:10">10:30-11:10</option>
-                <option value="11:10-11:30">11:10-11:30 AM Break</option>
-                <option value="11:30-12:10">11:30-12:10</option>
-                <option value="12:10-12:50">12:10-12:50</option>
-                <option value="12:50-2:00">12:50-2:00 Lunch</option>
-                <option value="2:00-2:40">2:00-2:40</option>
-                <option value="2:40-3:20">2:40-3:20</option>
-                <option value="3:20-4:20">3:20-4:20 PM Games</option>
-            </select>
-  <button class="btn btn-register" onclick="assignSelectedGradeLessons()">
-    <i class="fas fa-calendar-plus"></i> Generate Timetable for Selected Grade
-</button>
-<button class="btn btn-register" onclick="assignSelectedGradeLessons()">
-    <i class="fas fa-tasks"></i> Assign Daily Lessons
-</button>
-<button class="btn btn-register" onclick="assignSubject()">
-    <i class="fas fa-user-edit"></i> Assign Subject to Teacher
-</button>
-<button class="btn btn-print" onclick="extractAndPrintTimetableForGrade()">
-    <i class="fas fa-print"></i> Print Timetable for Selected Grade
-</button>
-<button class="btn btn-close" onclick="hideSubjectSelector()">
-    <i class="fas fa-times-circle"></i> Close
-</button>
-<button class="btn btn-close" onclick="clearTimetable()">
-    <i class="fas fa-trash-alt"></i> Clear Timetable
-</button>
-
-        </div>
-
-        <h2>Timetable</h2>
-        <table id="timetable">
-            <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>Grade</th>
-                    <th>8:00-8:40</th>
-                    <th>8:40-9:20</th>
-                    <th>9:20-9:50</th>
-                    <th>9:50-10:30</th>
-                    <th>10:30-11:10</th>
-                    <th>11:10-11:30</th>
-                    <th>11:30-12:10</th>
-                    <th>12:10-12:50</th>
-                    <th>12:50-2:00</th>
-                    <th>2:00-2:40</th>
-                    <th>2:40-3:20</th>
-                    <th>3:20-4:20</th>
-                </tr>
-            </thead>
-            <tbody id="timetableBody">
-                <!-- Dynamic rows will be added here -->
-            </tbody>
-        </table>
- <div id="assignmentSection">
-    <!-- Success message will appear here -->
+<div id="login-page" style="text-align: center; padding: 50px; background-color: #a5d6a7; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 300px; margin: 50px auto; border: 3px solid #4caf50;">
+  <div class="logo">
+    <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" class="logo-img" style="width: 100px; margin-bottom: 20px;">
+  </div>
+  
+  <h1 style="color: #0056b3; font-size: 28px; font-weight: bold;">RASM School Timetable Generator</h1>
+  
+  <label for="username" style="font-size: 18px; color: #333;">Username:</label>
+  <input type="text" id="username" placeholder="Enter Username" style="padding: 10px; font-size: 16px; margin: 10px 0; width: 80%; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box;">
+  
+  <label for="password" style="font-size: 18px; color: #333;">Password:</label>
+  <input type="password" id="password" placeholder="Enter Password" style="padding: 10px; font-size: 16px; margin: 10px 0; width: 80%; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box;">
+  
+  <button class="btn btn-register" onclick="login()" style="background-color: #4caf50; color: white; padding: 12px 20px; border-radius: 5px; border: none; font-size: 16px; cursor: pointer; width: 80%; margin-top: 20px;">
+    Login
+  </button>
+  
+  <p id="login-error" style="color: red; font-size: 14px; display: none;">Incorrect username or password. Please try again.</p>
 </div>
 
-<footer>
-            <p>2025. All rights reserved.
-Powered by RASM Tech.
 
-Looking for reliable school management software, We offer the following solutions:
 
-Timetable Generator,
-Duty Roster System,
-School and Exam Management System,
-Fee Management System
-,Library Management System.Contact us today:
-0792 755 676, 0795 054 571, 0790 515 026
+<!-- Main Content after Login -->
+<div id="single-view" style="display: none;">
+<!-- Logout Button -->
+<div style="text-align: right; margin-bottom: 20px;">
+  <button onclick="logout()" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; border: none; cursor: pointer;">
+    <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout
+  </button>
+</div>
 
- RASM Tech  Empowering schools with efficient, organized, and effortless management solutions.</p>
-        </footer>
+  <!-- Toggle Control Button -->
+  <div style="margin-bottom: 20px;">
+    <button onclick="toggleButtonGroup()" style="background-color: #6A1B9A; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; border: none; cursor: pointer;">
+      <i class="fas fa-tools" style="margin-right: 8px;"></i>
+      Show Controls
+    </button>
+  </div>
+
+  <!-- Button Group: Hidden by default -->
+  <div id="button-group" style="display: none; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+    <button onclick="toggleView('single')" style="background-color: #4CAF50; color: white;">
+      <i class="fas fa-columns"></i> Single-Page Mode
+    </button>
+
+    <button onclick="toggleView('wizard')" style="background-color: #2196F3; color: white;">
+      <i class="fas fa-magic"></i> Wizard Mode
+    </button>
+
+    <button onclick="generateCombinedTimetable()" class="btn btn-primary" style="background-color: #007bff; color: white;">
+      <i class="fas fa-calendar-check"></i> Generate Master Timetable
+    </button>
+  </div>
+
+  <!-- The rest of your #single-view content continues here -->
+
+
+<!-- Register Teacher Toggle -->
+<div style="margin-bottom: 20px;">
+  <button onclick="toggleRegisterForm()" style="background-color: #6A1B9A; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; border: none; cursor: pointer;">
+    <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
+    Register Teacher
+  </button>
+</div>
+
+<!-- Hidden Register Form -->
+<div id="register-teacher-box" class="box" style="display: none;">
+  <h2 style="
+    background-color: #e9f5ff;
+    color: #0056b3;
+    padding: 10px 20px;
+    border-left: 6px solid #0056b3;
+    border-radius: 6px;
+    font-size: 22px;
+    margin-top: 30px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  ">
+    Register Teacher
+  </h2>
+
+  <input id="teacher-name" placeholder="Teacher Name">
+  <input id="teacher-id" placeholder="Teacher Number" type="number">
+  <button onclick="registerTeacher()" style="background-color: #4caf50; color: white;">
+    <i class="fas fa-user-plus"></i> Register
+  </button>
+
+  <ul id="teacher-list"></ul>
+</div>
+
+  
+
+       <div class="box">
+    <h2 style="
+  background-color: #e6f9ec;
+  color: #2e7d32;
+  padding: 10px 20px;
+  border-left: 6px solid #2e7d32;
+  border-radius: 6px;
+  font-size: 22px;
+  margin-top: 30px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+">
+  Assign Subjects to Teachers (Per Grade)
+</h2>
+
+      <select id="assign-grade">
+        <option disabled selected>Select Grade</option>
+        <option value="4">Grade 4</option>
+        <option value="4A">Grade 4A</option>
+        <option value="4B">Grade 4B</option>
+        <option value="4C">Grade 4C</option>
+        <option value="5">Grade 5</option>
+        <option value="5A">Grade 5A</option>
+        <option value="5B">Grade 5B</option>
+        <option value="5C">Grade 5C</option>
+        <option value="6">Grade 6</option>
+        <option value="6A">Grade 6A</option>
+        <option value="6B">Grade 6B</option>
+        <option value="6C">Grade 6C</option>
+        <option value="7">Grade 7</option>
+        <option value="7A">Grade 7A</option>
+        <option value="7B">Grade 7B</option>
+        <option value="7C">Grade 7C</option>
+        <option value="8">Grade 8</option>
+        <option value="8A">Grade 8A</option>
+        <option value="8B">Grade 8B</option>
+        <option value="8C">Grade 8C</option>
+        <option value="9">Grade 9</option>
+        <option value="9A">Grade 9A</option>
+        <option value="9B">Grade 9B</option>
+        <option value="9C">Grade 9C</option>
+      </select>
+      <div id="subject-assignment"></div>
+  <button onclick="saveAssignments()" style="background-color: #ff9800; color: white;">
+  <i class="fas fa-save"></i> Save Assignments
+</button>
+<!-- Toggle Button -->
+<button onclick="toggleGradeSelector()" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-bottom: 10px;">
+  <i class="fas fa-sliders-h" style="margin-right: 8px;"></i>
+  Select Grades
+</button>
+
+<!-- Grade Selector Form -->
+<div id="grade-container" style="display: none; border: 1px solid #ccc; padding: 15px; border-radius: 10px; background-color: #f2f2f2; width: 300px; margin: 0 auto;">
+  <h2 style="color: #2e7d32; text-align: center;">Select Grades to Generate Timetable</h2>
+
+  <form id="grade-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+    <label><input type="checkbox" name="grade" value="4"> Grade 4</label>
+    <label><input type="checkbox" name="grade" value="4A"> Grade 4A</label>
+    <label><input type="checkbox" name="grade" value="4B"> Grade 4B</label>
+    <label><input type="checkbox" name="grade" value="4C"> Grade 4C</label>
+    <label><input type="checkbox" name="grade" value="5"> Grade 5</label>
+    <label><input type="checkbox" name="grade" value="5A"> Grade 5A</label>
+    <label><input type="checkbox" name="grade" value="5B"> Grade 5B</label>
+    <label><input type="checkbox" name="grade" value="5C"> Grade 5C</label>
+    <label><input type="checkbox" name="grade" value="6"> Grade 6</label>
+    <label><input type="checkbox" name="grade" value="6A"> Grade 6A</label>
+    <label><input type="checkbox" name="grade" value="6B"> Grade 6B</label>
+    <label><input type="checkbox" name="grade" value="6C"> Grade 6C</label>
+    <label><input type="checkbox" name="grade" value="7"> Grade 7</label>
+    <label><input type="checkbox" name="grade" value="7A"> Grade 7A</label>
+    <label><input type="checkbox" name="grade" value="7B"> Grade 7B</label>
+    <label><input type="checkbox" name="grade" value="7C"> Grade 7C</label>
+    <label><input type="checkbox" name="grade" value="8"> Grade 8</label>
+    <label><input type="checkbox" name="grade" value="8A"> Grade 8A</label>
+    <label><input type="checkbox" name="grade" value="8B"> Grade 8B</label>
+    <label><input type="checkbox" name="grade" value="8C"> Grade 8C</label>
+    <label><input type="checkbox" name="grade" value="9"> Grade 9</label>
+    <label><input type="checkbox" name="grade" value="9A"> Grade 9A</label>
+    <label><input type="checkbox" name="grade" value="9B"> Grade 9B</label>
+    <label><input type="checkbox" name="grade" value="9C"> Grade 9C</label>
+  </form>
+</div>
+
+ <button onclick="generateCombinedTimetable()" class="btn btn-primary" style="background-color: #007bff; color: white;">
+      <i class="fas fa-calendar-check"></i> Generate Master Timetable
+    </button>
+    <div class="grid" id="master-timetable"></div>
+    <div>
+
+
+  <div id="wizard-view" class="hidden">
+    <div class="box" id="wizard-step1">
+     <h2 style="background-color: lightgreen; color: black; padding: 8px 12px; border-radius: 4px;">Step 1: Register Teachers</h2>
+
+      <input id="wiz-teacher-name" placeholder="Teacher Name">
+      <input id="wiz-teacher-id" placeholder="Teacher Number" type="number">
+  <button onclick="registerTeacher(true)" style="background-color: #4caf50; color: white;">
+  <i class="fas fa-user-plus"></i> Register
+</button>   
+<ul id="wiz-teacher-list"></ul>
+      <button onclick="nextWizardStep(2)" style="background-color: #007bff; color: white;">
+  <i class="fas fa-arrow-right"></i> Next
+</button>
     </div>
-<script>
-        function login() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+      <div class="box">
+<h2 style="background-color: lightgreen; color: black; padding: 8px 12px; border-radius: 4px;">Step 2:Assign Subjects to Teachers  </h2>
+       <select id="assign-grade">
+        <option disabled selected>Select Grade</option>
+        <option value="4">Grade 4</option>
+        <option value="4A">Grade 4A</option>
+        <option value="4B">Grade 4B</option>
+        <option value="4C">Grade 4C</option>
+        <option value="5">Grade 5</option>
+        <option value="5A">Grade 5A</option>
+        <option value="5B">Grade 5B</option>
+        <option value="5C">Grade 5C</option>
+        <option value="6">Grade 6</option>
+        <option value="6A">Grade 6A</option>
+        <option value="6B">Grade 6B</option>
+        <option value="6C">Grade 6C</option>
+        <option value="7">Grade 7</option>
+        <option value="7A">Grade 7A</option>
+        <option value="7B">Grade 7B</option>
+        <option value="7C">Grade 7C</option>
+        <option value="8">Grade 8</option>
+        <option value="8A">Grade 8A</option>
+        <option value="8B">Grade 8B</option>
+        <option value="8C">Grade 8C</option>
+        <option value="9">Grade 9</option>
+        <option value="9A">Grade 9A</option>
+        <option value="9B">Grade 9B</option>
+        <option value="9C">Grade 9C</option>
+      </select>
+      <div id="subject-assignment"></div>
+  <button onclick="saveAssignments()" style="background-color: #ff9800; color: white;">
+  <i class="fas fa-save"></i> Save Assignments
+</button>
 
-    if (username === 'Nachu254' && password === 'Nm643PpQ@') {
-        let successMessage = document.getElementById('successMessage');
-        
-        // Remove any existing message to avoid duplicates
-        if (successMessage) {
-            successMessage.remove();
-        }
+    </div>
+    <div class="box hidden" id="wizard-step3">
+    <h2 style="background-color: teal; color: white; padding: 5px;">Step 3: Select Grades</h2>
 
-        // Create the success message
-        successMessage = document.createElement('p');
-        successMessage.textContent = 'Login successful!';
-        successMessage.style.color = 'green'; // Success message color
-        successMessage.style.fontWeight = 'bold'; // Optional: Make it bold
-        successMessage.id = 'successMessage'; // Add an ID to manage it later
+      <form id="wiz-grade-selector"></form>
+    <button onclick="generateMasterTimetable()">Generate Timetable</button>
+     
+</div>
 
-        // Append the message at the top of the login section
-        const loginSection = document.getElementById('loginSection');
-        loginSection.insertBefore(successMessage, loginSection.firstChild);
-
-        setTimeout(() => {
-            successMessage.remove(); // Remove the message after 3 seconds
-        }, 3000);
-
-        // Proceed with showing the main content
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-    } else {
-        alert('Invalid username or password.');
-    }
-}
-           const subjects = {
-    "Grade 1A": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&Nutrition", "C/Activities"],
-    "Grade 1B": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&Nutrition", "C/Activities"],
-    "Grade 2A": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&Nutrition", "C/Activities"],
-    "Grade 2B": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&$Nutrition", "C/Activities"],
-    "Grade 3A": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&Nutrition", "C/Activities"],
-    "Grade 3B": ["Literacy", "Kiswahili", "English", "Maths", "Environm", "H&Nutrition", "C/Activities"],
-    "Grade 4": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 4A": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 4B": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 4C": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 4D": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 5A": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 5B": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 5C": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 5D": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 6A": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 6B": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 6C": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 6D": ["English", "Maths", "Kiswahili", "CRE", "Agric&Nut", "Social Studies", "Creative/A", "Scie&Tech"],
-    "Grade 7": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 7A": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 7B": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 7C": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 7D": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 8": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 8A": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 8B": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 8C": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 8D": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 9": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 9A": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 9B": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 9C": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 9D": ["Sst", "Agric", "I/Scien", "Pretech", "CA&Sports", "Maths", "English", "Kiswahili", "CRE"],
-    "Grade 10": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 10A": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 10B": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 11": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 11A": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 11B": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 12": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 12A": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ],
-    "Grade 12B": [
-        "English", "Kiswahili/KSL", "Physical Education", "Mathematics", "Biology", "Chemistry", 
-        "Physics", "Agriculture", "Computer Studies", "Home Science", "Drawing and Design", 
-        "Community Service", "Advanced Mathematics", "Aviation Technology", "Building and Construction", 
-        "Electrical Technology", "Metal Technology", "Power Mechanics", "Wood Technology", "Media Technology", 
-        "Marine and Fisheries Technology", "Advanced English", "Literature in English", "Indigenous Language", 
-        "Kenya Sign Language", "Fasihi ya Kiswahili", "Sign Language", "Arabic", "French", "German", "Mandarin Chinese", 
-        "History and Citizenship", "Geography", "Christian Religious Education"
-    ]
-        };
-        function showSubjectSelector() {
-            const gradeSelect = document.getElementById("gradeSelect");
-            const selectedGrade = gradeSelect.value;
-            const subjectListDiv = document.getElementById("subjectList");
-
-            subjectListDiv.innerHTML = ''; // Clear previous subjects
-
-            if (selectedGrade) {
-                subjects[selectedGrade].forEach(subject => {
-                    subjectListDiv.innerHTML += `
-                        <div>
-                            <input type="checkbox" id="${subject}" value="${subject}">
-                            <label for="${subject}">${subject}</label>
-                        </div>`;
-                });
-                document.getElementById("subjectSelector").style.display = "block";
-            } else {
-                document.getElementById("subjectSelector").style.display = "none";
-            }
-        }
-
-        function hideSubjectSelector() {
-            document.getElementById("subjectSelector").style.display = "none";
-        }
-
-     function assignSubject() {
-    const subjectName = document.getElementById('subjectName').value.trim();
-    const teacherName = document.getElementById('teacherSelect').value.trim();
-    const grade = document.getElementById('gradeSelect').value.trim();
-    
-    if (subjectName && teacherName && grade) {
-        // Create the success message
-        const successMessage = document.createElement('p');
-        successMessage.textContent = `Subject "${subjectName}" has been successfully assigned to ${teacherName} for ${grade}!`;
-        successMessage.style.color = 'green';  // Green color for success
-        successMessage.style.fontWeight = 'bold';  // Make the text bold
-        successMessage.style.fontSize = '18px';  // Optional: Adjust font size
-        successMessage.id = 'subjectAssignSuccessMessage';  // Optional: Add an ID to manage it later
-        
-        // Append the success message to the assignment section
-        document.getElementById('assignmentSection').appendChild(successMessage);
-
-        // Remove the success message after 3 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 3000);
-
-        // Clear the input fields after assignment
-        document.getElementById('subjectName').value = ''; // Clear subject input
-        document.getElementById('teacherSelect').value = ''; // Clear teacher selection
-        document.getElementById('gradeSelect').value = ''; // Clear grade selection
-    } else {
-        alert('Please select a subject, teacher, and grade.');
-    }
-
-
-            const timetableBody = document.getElementById("timetableBody");
-            let row = [...timetableBody.rows].find(row => row.cells[0].textContent === selectedDay && row.cells[1].textContent === selectedGrade);
-            if (!row) {
-                row = timetableBody.insertRow();
-                row.insertCell().textContent = selectedDay;
-                row.insertCell().textContent = selectedGrade;
-                for (let i = 0; i < 12; i++) { // Create empty cells for time slots
-                    row.insertCell();
-                }
-            }
-
-            const timeIndex = getTimeIndex(selectedTime);
-            selectedSubjects.forEach(subject => {
-                const cell = row.cells[timeIndex + 2]; // Offset by 2 for Day and Grade columns
-                cell.innerHTML = `${subject}<br>${selectedTeacher}`;
-                cell.classList.add("assigned"); // Optional: highlight assigned cells
-            });
-        }
-
-        function getTimeIndex(time) {
-            const timeSlots = [
-                "8:00-8:40", "8:40-9:20", "9:20-9:50", "9:50-10:30", 
-                "10:30-11:10", "11:10-11:30", "11:30-12:10", "12:10-12:50", 
-                "12:50-2:00", "2:00-2:40", "2:40-3:20", "3:20-4:20"
-            ];
-            return timeSlots.indexOf(time);
-        }
-function registerTeacher() {
-    const teacherName = document.getElementById('newTeacherName').value.trim();
-    
-    if (teacherName) {
-        // Create the success message
-        const successMessage = document.createElement('p');
-        successMessage.textContent = 'Teacher registered successfully!';
-        successMessage.style.color = 'green';  // Green color for success
-        successMessage.style.fontWeight = 'bold';  // Bold font
-        successMessage.style.fontSize = '18px';  // Optional: Adjust font size
-        successMessage.id = 'teacherSuccessMessage';  // Optional: Add an ID to manage it later
-        
-        // Append the success message to the teacher registration section
-        document.getElementById('teacherRegistration').appendChild(successMessage);
-
-        // Remove the success message after 3 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 3000);
-
-        // Add the newly registered teacher to the "Select Teacher" dropdown
-        const teacherSelect = document.getElementById('teacherSelect');
-        const newOption = document.createElement('option');
-        newOption.value = teacherName;  // Set the teacher's name as the value
-        newOption.textContent = teacherName;  // Display the teacher's name in the dropdown
-        teacherSelect.appendChild(newOption);  // Add the new option to the dropdown
-
-        // Optionally, select the new teacher
-        teacherSelect.value = teacherName;
-
-        // Clear the input field after registration
-        document.getElementById('newTeacherName').value = '';
-    } else {
-        alert('Please enter a teacher name.');
-    }
-}
-function addNewSubject() {
-    const newSubjectName = document.getElementById('newSubjectName').value.trim();
-    const gradeRange = document.getElementById('gradeRangeSelect').value; // Get selected grade range
-    
-    if (newSubjectName && gradeRange) {
-        // Check if there's already a success message and remove it
-        const existingMessage = document.getElementById('subjectSuccessMessage');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
-
-        // Create the success message
-        const successMessage = document.createElement('p');
-        successMessage.textContent = `New Subject "${newSubjectName}" added successfully to ${gradeRange}!`;
-        successMessage.style.color = 'red';  // Red color for success
-        successMessage.style.fontWeight = 'bold';  // Bold font
-        successMessage.style.fontSize = '18px';  // Optional: Adjust font size
-        successMessage.id = 'subjectSuccessMessage';  // Optional: Add an ID to manage it later
-        
-        // Append the success message to the new subject section
-        document.getElementById('newSubjectSection').appendChild(successMessage);
-
-        // Remove the success message after 3 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 3000);
-
-        // Find the corresponding grade range dropdown based on the selected grade range
-        let gradeRangeSelect = null;
-        if (gradeRange === 'Grade 1-3') {
-            gradeRangeSelect = document.getElementById('grade1to3Subjects');
-        } else if (gradeRange === 'Grade 4-6') {
-            gradeRangeSelect = document.getElementById('grade4to6Subjects');
-        } else if (gradeRange === 'Grade 7-9') {
-            gradeRangeSelect = document.getElementById('grade7to9Subjects');
-        } else if (gradeRange === 'Grade 10-12') {
-            gradeRangeSelect = document.getElementById('grade10to12Subjects');
-        }
-
-        // If a valid grade range is selected, add the new subject
-        if (gradeRangeSelect) {
-            const newOption = document.createElement('option');
-            newOption.value = newSubjectName;  // Set the subject name as the value
-            newOption.textContent = newSubjectName;  // Display the subject name in the dropdown
-            gradeRangeSelect.appendChild(newOption);  // Add the new option to the corresponding grade range dropdown
-
-            // Optionally, select the new subject
-            gradeRangeSelect.value = newSubjectName;
-        }
-
-        // Clear the input field after adding the new subject
-        document.getElementById('newSubjectName').value = '';
-    } else {
-        alert('Please enter a subject name and select a grade range.');
-    }
-
-    // Determine the grades to which this subject should be added
-    let targetGrades;
-    switch (gradeRange) {
-        case "1-3":
-            targetGrades = ["Grade 1A", "Grade 1B", "Grade 2A", "Grade 2B", "Grade 3A", "Grade 3B"];
-            break;
-        case "4-6":
-            targetGrades = ["Grade 4A", "Grade 4B", "Grade 5A", "Grade 5B", "Grade 6A", "Grade 6B"];
-            break;
-        case "7-9":
-            targetGrades = ["Grade 7A", "Grade 7B", "Grade 8A", "Grade 8B", "Grade 9A", "Grade 9B"];
-            break;
-        case "10-12":
-            targetGrades = ["Grade 10A", "Grade 10B", "Grade 11A", "Grade 11B", "Grade 12A", "Grade 12B"];
-            break;
-        default:
-            alert("Invalid grade range selected.");
-            return;
-    }
-
-    // Add the subject to each grade in the selected range
-    targetGrades.forEach(grade => {
-        if (!subjects[grade]) {
-            subjects[grade] = [];
-        }
-        subjects[grade].push(newSubjectName);
-    });
-
-    // Refresh the subject selector and clear input fields
-    showSubjectSelector();
+    <div class="grid" id="wiz-master-timetable"></div>
    
+<button onclick="printTimetable(true)" style="background-color: #ff5722; color: white;">
+  <i class="fas fa-print"></i> Print Timetable
+</button>
+ </div>
+<div class="box">
+
+</div>
+<div id="combined-timetable" class="mt-6"></div>
+<button onclick="printCombinedTimetable()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 print:hidden">
+  <i class="fas fa-print"></i> Print Timetable
+</button>
+<div class="no-print" id="term-combined-title" style="margin-bottom: 10px;">
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px;">
+  <span><strong>Term:</strong> Select term to show on printed timetable</span>
+  <select id="term-selector" style="padding: 6px; font-size: 14px; border-radius: 4px;">
+    <option value="Term 1">Term 1</option>
+    <option value="Term 2">Term 2</option>
+    <option value="Term 3">Term 3</option>
+  </select>
+</div>
+
+
+<button onclick="extractFromCombinedTimetable()" style="background-color: #6A1B9A; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 20px;">
+  <i class="fas fa-code-branch"></i> Extract Class & Teacher Timetables
+</button>
+
+<div id="extracted-timetables" style="margin-top: 40px;"></div>
+<div style="margin-top: 30px;">
+
+</div>
+
+<!-- Add this modal HTML to your page -->
+<div id="customConfirm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid #ccc; padding: 20px; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); z-index: 1000;">
+  <p id="confirmMessage"></p>
+  <button id="confirmYes" style="color: white; background: green; border: none; padding: 10px;">Yes</button>
+  <button id="confirmNo" style="color: white; background: red; border: none; padding: 10px;">No</button>
+</div>
+<footer>
+  2025 Nachu Junior School | All rights reserved. | Powered by RASM Technologies
+</footer>
+</body>
+
+
+  <script>
+   let teachers = [];
+const assignments = {};
+const subjects = {
+  daily: ['English', 'Maths', 'Creative Arts & Sports', 'Integrated Science'],
+  fourPerWeek: ['Kiswahili', 'CRE', 'Social Studies', 'Pre-Technical', 'Agriculture']
+};
+const periods = ['8:00-8:40', '8:40-9:20', 'Break', '9:50-10:30', '10:30-11:10', 'Break', '11:35-12:15', '12:15-12:55', 'Lunch', '2:00-2:40', '2:40-3:00', 'Games'];
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const lessonSlots = [0,1,3,4,6,7,9,10];
+let teacherSchedule = {};
+
+// Extract unique grades from the teachers list
+function getUniqueGrades() {
+  return [...new Set(teachers.map(t => t.grade))];
 }
 
- function printTimetable() {
-    const schoolName = document.getElementById('schoolName').value;
-    const term = document.getElementById('term').value;
-    const date = document.getElementById('date').value;
+function toggleView(mode) {
+  document.getElementById('single-view').classList.toggle('hidden', mode !== 'single');
+  document.getElementById('wizard-view').classList.toggle('hidden', mode !== 'wizard');
+}
+// ?? Function to register a teacher and persist
+function registerTeacher(wizard = false) {
+  const name = document.getElementById(wizard ? 'wiz-teacher-name' : 'teacher-name').value;
+  const id = document.getElementById(wizard ? 'wiz-teacher-id' : 'teacher-id').value;
 
-    let printWindow = window.open('', '', 'height=500,width=800');
-    printWindow.document.write('<html><head><title>Timetable</title>');
-    printWindow.document.write(`
-        <style>
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 3px solid black; padding: 8px; text-align: left; }
-           .stamp {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                border: 2px solid blue;
-                color: blue;
-                font-size: 12px;
-                text-align: center;
-                padding: 10px;
-                border-radius: 5px;
-                background-color: rgba(255, 255, 255, 0.8);
-                z-index: 10;
+  if (!name || !id) {
+    showCustomAlert('Please fill in both fields.', 'red'); // Red alert for missing fields
+    return;
+  }
+
+  const newTeacher = { name, id };
+  teachers.push(newTeacher);
+
+  // Save to localStorage
+  localStorage.setItem('teachers', JSON.stringify(teachers));
+
+  // Update both views
+  updateTeacherLists();
+
+  // Clear inputs
+  document.getElementById(wizard ? 'wiz-teacher-name' : 'teacher-name').value = '';
+  document.getElementById(wizard ? 'wiz-teacher-id' : 'teacher-id').value = '';
+
+  showCustomAlert('Teacher successfully registered!', 'green'); // Green alert for success
+}
+function showCustomAlert(message, color) {
+  const alertBox = document.createElement('div');
+  alertBox.className = 'custom-alert';
+  
+  // Style the alert box
+  alertBox.style.position = 'fixed';
+  alertBox.style.top = '50%';
+  alertBox.style.left = '50%';
+  alertBox.style.transform = 'translate(-50%, -50%)';
+  alertBox.style.backgroundColor = color;
+  alertBox.style.color = 'white';
+  alertBox.style.padding = '15px 30px';
+  alertBox.style.margin = '10px 0';
+  alertBox.style.borderRadius = '5px';
+  alertBox.style.textAlign = 'center';
+  alertBox.style.zIndex = '9999'; // Ensures it is on top of other elements
+  alertBox.style.fontSize = '16px';
+  alertBox.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)'; // Optional shadow for better visibility
+  alertBox.innerText = message;
+
+  // Add the alert to the body
+  document.body.appendChild(alertBox);
+
+  // Automatically remove the alert after 3 seconds
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
+}
 
 
-            }
-            .container {
-                position: relative;
-            }
-            .footer {
-                margin-top: 20px;
-                padding-top: 10px;
-                border-top: 2px solid black;
-                text-align: center;
-                font-size: 12px;
-                color: black;
-            }
-            h2, h3 {
-                text-align: center;
-                margin: 5px 0;
-                font-size: 26px; /* Increased font size */
-                font-weight: bold; /* Bold text */
-                color: #2196F3; /* Custom color (blue) */
-            }
-        </style>
-    `);
-    printWindow.document.write('</head><body>');
+// ?? Function to render teacher list in both main and wizard sections
+function updateTeacherLists() {
+  const teacherList = document.getElementById('teacher-list');
+  const wizTeacherList = document.getElementById('wiz-teacher-list');
+  teacherList.innerHTML = '';
+  wizTeacherList.innerHTML = '';
+  teachers.forEach(t => {
+    const item = `<li>${t.name} (T${t.id})</li>`;
+    teacherList.innerHTML += item;
+    wizTeacherList.innerHTML += item;
+  });
+}
 
-    // Add headers
-    printWindow.document.write(`<h2>${schoolName}</h2>`);
-    printWindow.document.write(`<h3>Term: ${term}</h3>`);
-    printWindow.document.write(`<h3>Date: ${date}</h3>`);
+// ?? Load teachers from localStorage on page load
+window.onload = function () {
+  const saved = localStorage.getItem('teachers');
+  if (saved) {
+    teachers = JSON.parse(saved);
+    updateTeacherLists();
+  }
+};
 
-    // Container for the table and stamp
-    printWindow.document.write('<div class="container">');
+    document.getElementById('assign-grade').addEventListener('change', e => createAssignDropdown(e.target.value, false));
+    document.getElementById('wiz-assign-grade').addEventListener('change', e => createAssignDropdown(e.target.value, true));
 
-    // Add the stamp
-    printWindow.document.write(`
-        <div class="stamp">
-            <div>
-                Rasm School <br>
-                P.O. Box 00-556, Nairobi<br>
-                Date: ${new Date().toLocaleDateString()}
-            </div>
-        </div>
-    `);
+    function createAssignDropdown(grade, wizard = false) {
+      const div = document.getElementById(wizard ? 'wiz-subject-assignment' : 'subject-assignment');
+      div.innerHTML = '';
+      [...subjects.daily, ...subjects.fourPerWeek].forEach(subj => {
+        const sel = document.createElement('select');
+        sel.id = `${wizard ? 'wiz-' : ''}g${grade}-${subj}`;
+        sel.innerHTML = '<option disabled selected>Select teacher</option>' + teachers.map(t => `<option value="${t.id}">${subj} - ${t.name} (T${t.id})</option>`).join(' ');
+        div.appendChild(sel);
+      });
+    }
 
-    // Add timetable table
-    printWindow.document.write('<table>');
-    printWindow.document.write(`
+ function saveAssignments(wizard = false) {
+  const grade = document.getElementById(wizard ? 'wiz-assign-grade' : 'assign-grade').value;
+
+  if (!grade) {
+    showCustomAlert('Please select a grade.', 'red');  // Red alert for missing grade selection
+    return;
+  }
+
+  if (!assignments[grade]) assignments[grade] = {};
+
+  // Ensure the Save button stays visible
+  const saveButton = document.querySelector('button[onclick="saveAssignments()"]');
+  saveButton.style.display = 'inline-block';  // Ensure it's visible
+
+  [...subjects.daily, ...subjects.fourPerWeek].forEach(subj => {
+    const teacherId = document.getElementById(`${wizard ? 'wiz-' : ''}g${grade}-${subj}`)?.value;
+    if (teacherId) assignments[grade][subj] = teacherId;
+  });
+
+  showCustomAlert(`Assignments for Grade ${grade} saved.`, 'green');  // Green alert for success
+}
+function showCustomAlert(message, color) {
+  const alertBox = document.createElement('div');
+  alertBox.className = 'custom-alert';
+  
+  // Style the alert box
+  alertBox.style.position = 'fixed';
+  alertBox.style.top = '50%';
+  alertBox.style.left = '50%';
+  alertBox.style.transform = 'translate(-50%, -50%)';
+  alertBox.style.backgroundColor = color;
+  alertBox.style.color = 'white';
+  alertBox.style.padding = '15px 30px';
+  alertBox.style.margin = '10px 0';
+  alertBox.style.borderRadius = '5px';
+  alertBox.style.textAlign = 'center';
+  alertBox.style.zIndex = '9999'; // Ensures it is on top of other elements
+  alertBox.style.fontSize = '16px';
+  alertBox.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)'; // Optional shadow for better visibility
+  alertBox.innerText = message;
+
+  // Add the alert to the body
+  document.body.appendChild(alertBox);
+
+  // Automatically remove the alert after 3 seconds
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
+}
+
+
+    document.getElementById('grade-selector').innerHTML = Array.from({length: 9}, (_, i) => `<label><input type="checkbox" name="grade" value="${i+1}"> Grade ${i+1}</label><br>`).join('');
+    document.getElementById('wiz-grade-selector').innerHTML = document.getElementById('grade-selector').innerHTML;
+
+    function isFree(tid, day, period) {
+      return !(teacherSchedule[tid] && teacherSchedule[tid][`${day}-P${period}`]);
+    }
+
+    function occupy(tid, day, period) {
+      if (!teacherSchedule[tid]) teacherSchedule[tid] = {};
+      teacherSchedule[tid][`${day}-P${period}`] = true;
+    }
+
+
+function generateSchedule(grade) {
+  const schedule = {};
+  const assign = assignments[grade];
+  if (!assign) return null;
+
+  const mathPeriodsOnly = [0, 1, 3, 4, 6, 7]; // 8:00–12:55 periods
+
+  const allowedPeriodsFor = (subj) => subj === 'Mathematics' ? mathPeriodsOnly : null;
+
+  const assignedSubjects = [...subjects.daily, ...subjects.fourPerWeek];
+  const allSubjectsPerWeek = {};
+  subjects.daily.forEach(subj => allSubjectsPerWeek[subj] = 5);
+  subjects.fourPerWeek.forEach(subj => allSubjectsPerWeek[subj] = 4);
+
+  // Initialize schedule
+  days.forEach(day => {
+    schedule[day] = Array(periods.length).fill('');
+  });
+
+  // Reserve Breaks, Lunch, Games
+  periods.forEach((label, i) => {
+    if (label === 'Break' || label === 'Lunch' || label === 'Games') {
+      days.forEach(day => schedule[day][i] = label);
+    }
+  });
+
+  const subjectAppearsOnDay = (day, subj) =>
+    schedule[day].some(cell => cell.includes(subj));
+
+  const subjectAppearsAtPeriod = (period, subj) =>
+    days.some(day => schedule[day][period]?.includes(subj));
+
+  function findFreeSlotAvoidingPattern(tid, subj, avoid = {}, allowedPeriods = null) {
+    const options = [];
+    for (let day of days) {
+      if (subjectAppearsOnDay(day, subj)) continue;
+      for (let p of lessonSlots) {
+        if (
+          (!allowedPeriods || allowedPeriods.includes(p)) &&
+          !schedule[day][p] &&
+          isFree(tid, day, p + 1) &&
+          !subjectAppearsAtPeriod(p, subj) &&
+          (!avoid[day] || !avoid[day].includes(p))
+        ) {
+          options.push({ day, period: p });
+        }
+      }
+    }
+    return options.sort(() => Math.random() - 0.5)[0] || null;
+  }
+
+  const subjectPlacedCount = {};
+  assignedSubjects.forEach(s => subjectPlacedCount[s] = 0);
+
+  // STEP 1: Place daily subjects (5x)
+  subjects.daily.forEach(subj => {
+    const tid = assign[subj];
+    const avoid = {};
+    let count = 0;
+    while (count < 5) {
+      const slot = findFreeSlotAvoidingPattern(tid, subj, avoid, allowedPeriodsFor(subj));
+      if (!slot) break;
+      schedule[slot.day][slot.period] = `${subj} (T${tid})`;
+      occupy(tid, slot.day, slot.period + 1);
+      avoid[slot.day] ??= [];
+      avoid[slot.day].push(slot.period);
+      subjectPlacedCount[subj]++;
+      count++;
+    }
+  });
+
+  // STEP 2: Place 4x subjects
+  subjects.fourPerWeek.forEach(subj => {
+    const tid = assign[subj];
+    const avoid = {};
+    let count = 0;
+    while (count < 4) {
+      const slot = findFreeSlotAvoidingPattern(tid, subj, avoid, allowedPeriodsFor(subj));
+      if (!slot) break;
+      schedule[slot.day][slot.period] = `${subj} (T${tid})`;
+      occupy(tid, slot.day, slot.period + 1);
+      avoid[slot.day] ??= [];
+      avoid[slot.day].push(slot.period);
+      subjectPlacedCount[subj]++;
+      count++;
+    }
+  });
+
+  // STEP 3: Fill any remaining empty lessons with under-assigned subjects only
+  for (let day of days) {
+    for (let p of lessonSlots) {
+      if (!schedule[day][p]) {
+        for (let subj of assignedSubjects) {
+          const tid = assign[subj];
+          const maxCount = allSubjectsPerWeek[subj];
+          const allowed = allowedPeriodsFor(subj);
+          if (
+            subjectPlacedCount[subj] < maxCount &&
+            !subjectAppearsOnDay(day, subj) &&
+            !subjectAppearsAtPeriod(p, subj) &&
+            isFree(tid, day, p + 1) &&
+            (!allowed || allowed.includes(p))
+          ) {
+            schedule[day][p] = `${subj} (T${tid})`;
+            occupy(tid, day, p + 1);
+            subjectPlacedCount[subj]++;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // STEP 4: Final sweep to fill any remaining blanks safely
+  for (let day of days) {
+    for (let p of lessonSlots) {
+      if (!schedule[day][p]) {
+        for (let subj of assignedSubjects) {
+          const tid = assign[subj];
+          const maxCount = allSubjectsPerWeek[subj];
+          const allowed = allowedPeriodsFor(subj);
+          if (
+            subjectPlacedCount[subj] < maxCount &&
+            (!allowed || allowed.includes(p))
+          ) {
+            schedule[day][p] = `${subj} (T${tid})`;
+            occupy(tid, day, p + 1);
+            subjectPlacedCount[subj]++;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // STEP 5: Resolve teacher conflicts if any
+  const teacherMap = {};
+  for (let d of days) {
+    for (let p of lessonSlots) {
+      const cell = schedule[d][p];
+      if (cell.includes('(T')) {
+        const tid = parseInt(cell.split('(T')[1].replace(')', ''));
+        teacherMap[d] ??= {};
+        teacherMap[d][p] ??= [];
+        teacherMap[d][p].push({ tid, subj: cell.split(' (')[0], grade });
+      }
+    }
+  }
+
+  for (let d of days) {
+    for (let p of lessonSlots) {
+      const entries = teacherMap[d]?.[p] || [];
+      if (entries.length > 1) {
+        for (let i = 1; i < entries.length; i++) {
+          const { tid, subj } = entries[i];
+          schedule[d][p] = '';
+          subjectPlacedCount[subj]--;
+          const slot = findFreeSlotAvoidingPattern(tid, subj, {}, allowedPeriodsFor(subj));
+          if (slot) {
+            schedule[slot.day][slot.period] = `${subj} (T${tid})`;
+            occupy(tid, slot.day, slot.period + 1);
+            subjectPlacedCount[subj]++;
+          } else {
+            console.warn(`Unresolved conflict: ${subj} (T${tid}) in ${grade}`);
+          }
+        }
+      }
+    }
+  }
+
+  return schedule;
+}
+function generateCombinedTimetable() {
+  const output = document.getElementById('combined-timetable');
+  output.innerHTML = '';
+  teacherSchedule = {};
+
+  const selected = [...document.querySelectorAll(`#grade-selector input:checked`)].map(g => g.value);
+  if (!selected.length) return showCustomAlert('Select at least one grade.', 'red');
+  for (let grade of selected) {
+    if (!assignments[grade]) return showCustomAlert(`No assignments for Grade ${grade}`, 'orange');
+  }
+
+  const allSchedules = {};
+
+  selected.forEach(grade => {
+    allSchedules[grade] = generateSchedule(grade);
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'mb-8 p-4 border shadow-md rounded-2xl bg-white overflow-auto';
+
+  let html = `
+    <style>
+      #combined-timetable table, 
+      #combined-timetable th, 
+      #combined-timetable td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      #combined-timetable th, 
+      #combined-timetable td {
+        padding: 8px;
+        text-align: center;
+      }
+      #combined-timetable thead {
+        background-color: #f1f1f1;
+        font-weight: bold;
+      }
+      .break-cell {
+        background-color: #ffeeba;
+      }
+      .lunch-cell {
+        background-color: #c3e6cb;
+      }
+      .games-cell {
+        background-color: #bee5eb;
+      }
+    </style>
+
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-white bg-red-600 px-4 py-2 rounded shadow-md">
+        <i class="fas fa-calendar-alt mr-2"></i> Generated Master Timetable Is Here
+      </h3>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead>
         <tr>
-            <th>Day</th>
-            <th>Grade</th>
-            <th>8:00-8:40</th>
-            <th>8:40-9:20</th>
-            <th>9:20-9:50</th>
-            <th>9:50-10:30</th>
-            <th>10:30-11:10</th>
-            <th>11:10-11:30</th>
-            <th>11:30-12:10</th>
-            <th>12:10-12:50</th>
-            <th>12:50-2:00</th>
-            <th>2:00-2:40</th>
-            <th>2:40-3:20</th>
-            <th>3:20-4:20</th>
-        </tr>
-    `);
+          <th>Day</th>
+          <th>Grade</th>`;
 
-    // Populate timetable rows
-    const timetableBody = document.getElementById('timetableBody');
-    for (let row of timetableBody.rows) {
-        printWindow.document.write('<tr>');
-        for (let cell of row.cells) {
-            printWindow.document.write(`<td>${cell.innerHTML}</td>`);
-        }
-        printWindow.document.write('</tr>');
-    }
+  periods.forEach(t => {
+    html += `<th>${t}</th>`;
+  });
 
-    printWindow.document.write('</table>');
-    printWindow.document.write('</div>'); // Close container div
+  html += `</tr></thead><tbody>`;
 
-    // Add the footer
-    printWindow.document.write(`
-        <div class="footer">
-            <p><strong>Looking for reliable school management software?</strong></p>
-            <p>We offer the following solutions:</p>
-            <p>Timetable Generator, Duty Roster System, School and Exam Management System, Fee Management System, Library Management System</p>
-            <p>Contact us today: <strong>0792 755 676, 0795 054 571, 0790 515 026</strong></p>
-            <p><strong>RASM Tech</strong> - Empowering schools with efficient, organized, and effortless management solutions.</p>
-        </div>
-    `);
+  days.forEach(day => {
+    Object.entries(allSchedules).forEach(([grade, schedule]) => {
+      html += `<tr><td>${day}</td><td>${grade}</td>`;
+      schedule[day].forEach(subject => {
+        const lower = subject.toLowerCase();
+        let cellClass = '';
+        if (lower.includes('break')) cellClass = 'break-cell';
+        else if (lower.includes('lunch')) cellClass = 'lunch-cell';
+        else if (lower.includes('games')) cellClass = 'games-cell';
+        html += `<td class="${cellClass}">${subject}</td>`;
+      });
+      html += `</tr>`;
+    });
+  });
 
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.print();
+  html += `</tbody></table>`;
+  wrapper.innerHTML = html;
+  output.appendChild(wrapper);
+}
+
+function showCustomAlert(message, color) {
+  const alertBox = document.createElement('div');
+  alertBox.className = 'custom-alert';
+  
+  // Style the alert box
+  alertBox.style.position = 'fixed';
+  alertBox.style.top = '50%';
+  alertBox.style.left = '50%';
+  alertBox.style.transform = 'translate(-50%, -50%)';
+  alertBox.style.backgroundColor = color;
+  alertBox.style.color = 'white';
+  alertBox.style.padding = '15px 30px';
+  alertBox.style.margin = '10px 0';
+  alertBox.style.borderRadius = '5px';
+  alertBox.style.textAlign = 'center';
+  alertBox.style.zIndex = '9999'; // Ensures it is on top of other elements
+  alertBox.style.fontSize = '16px';
+  alertBox.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)'; // Optional shadow for better visibility
+  alertBox.innerText = message;
+
+  // Add the alert to the body
+  document.body.appendChild(alertBox);
+
+  // Automatically remove the alert after 3 seconds
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
 }
 
 
- function assignSubject() {
-    const subjectName = document.getElementById('subjectName').value.trim();
-    const teacherName = document.getElementById('teacherSelect').value.trim();
-    const grade = document.getElementById('gradeSelect').value.trim();
-    
-    if (subjectName && teacherName && grade) {
-        // Create the success message
-        const successMessage = document.createElement('p');
-        successMessage.textContent = `Subject "${subjectName}" has been successfully assigned to ${teacherName} for ${grade}!`;
-        successMessage.style.color = 'green';  // Green color for success
-        successMessage.style.fontWeight = 'bold';  // Make the text bold
-        successMessage.style.fontSize = '18px';  // Optional: Adjust font size
-        successMessage.id = 'subjectAssignSuccessMessage';  // Optional: Add an ID to manage it later
-        
-        // Append the success message to the assignment section
-        document.getElementById('assignmentSection').appendChild(successMessage);
+function printCombinedTimetable() {
+  const term = document.getElementById("term-selector")?.value || "Term 1";
+  const logoURL = "https://i.imgur.com/uWrz8rt.png"; // Replace with your actual logo path
 
-        // Remove the success message after 3 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 3000);
+  const headerHTML = `
+    <div style="text-align:center; margin-bottom: 20px;">
+      <img src="${logoURL}" alt="School Logo" style="height: 80px; margin-bottom: 10px;"><br>
+      <h2 style="margin: 0; font-family: Arial;">NACHU JUNIOR SCHOOL</h2>
+      <h3 style="margin: 0; font-family: Arial;">MASTER TIMETABLE 2025</h3>
+      <p style="font-family: Arial;"><strong>TERM:</strong> ${term}</p>
+    </div>
+  `;
 
-        // Clear the input fields after assignment
-        document.getElementById('subjectName').value = ''; // Clear subject input
-        document.getElementById('teacherSelect').value = ''; // Clear teacher selection
-        document.getElementById('gradeSelect').value = ''; // Clear grade selection
+  // Get the timetable HTML
+  const timetable = document.getElementById('combined-timetable');
+
+  // Clone and apply inline styles
+  const clonedTable = timetable.cloneNode(true);
+  clonedTable.setAttribute("style", "width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;");
+
+  const ths = clonedTable.querySelectorAll("th");
+  ths.forEach(th => {
+    th.setAttribute("style", "background-color: #4CAF50; color: white; border: 1px solid #333; padding: 6px; text-align: center;");
+  });
+
+  const tds = clonedTable.querySelectorAll("td");
+  tds.forEach(td => {
+    let bg = "";
+    const text = td.innerText.trim().toLowerCase();
+    if (text === "break") bg = "#ffeeba";
+    else if (text === "lunch") bg = "#ffeeba";
+    else if (text === "games") bg = "#ffeeba";
+
+    td.setAttribute("style", `border: 1px solid #333; padding: 6px; text-align: center; font-family: Arial;${bg ? " background-color: " + bg + "; font-weight: bold;" : ""}`);
+  });
+
+  // Open new window for printing
+  const printWindow = window.open('', '', 'height=900,width=1200');
+  printWindow.document.write('<html><head><title>Print Timetable</title></head><body style="margin:0; padding:20px;">');
+  printWindow.document.write(headerHTML);
+  printWindow.document.write(clonedTable.outerHTML);
+  printWindow.document.write('</body></html>');
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+}
+function toggleGradeSelector() {
+    const container = document.getElementById("grade-container");
+    container.style.display = (container.style.display === "none") ? "block" : "none";
+  }
+  function login() { 
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  // Dummy validation for now (replace with real authentication logic)
+  if (username === "admin" && password === "7") {
+    // Hide login page and show the main content
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('single-view').style.display = 'block';
+
+    // Populate teacher dropdown after login
+    populateTeacherDropdown();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+ function toggleButtonGroup() {
+    const group = document.getElementById('button-group');
+    const toggleBtn = event.currentTarget;
+
+    if (group.style.display === "none") {
+      group.style.display = "flex";
+      toggleBtn.innerHTML = '<i class="fas fa-eye-slash" style="margin-right: 8px;"></i> Hide Controls';
     } else {
-        alert('Please select a subject, teacher, and grade.');
+      group.style.display = "none";
+      toggleBtn.innerHTML = '<i class="fas fa-tools" style="margin-right: 8px;"></i> Show Controls';
     }
+  }
 
 
-    const timetableBody = document.getElementById("timetableBody");
-    let row = [...timetableBody.rows].find(row => row.cells[0].textContent === selectedDay && row.cells[1].textContent === selectedGrade);
-    if (!row) {
-        row = timetableBody.insertRow();
-        row.insertCell().textContent = selectedDay;
-        row.insertCell().textContent = selectedGrade;
-        for (let i = 0; i < 12; i++) { // Create empty cells for time slots
-            row.insertCell();
-        }
-    }
+ function toggleRegisterForm() {
+    const box = document.getElementById('register-teacher-box');
+    const isVisible = box.style.display === 'block';
+    box.style.display = isVisible ? 'none' : 'block';
+  }
+let confirmCallback = null;
 
-    const timeIndex = getTimeIndex(selectedTime);
-    selectedSubjects.forEach(subject => {
-        const cell = row.cells[timeIndex + 2]; // Offset by 2 for Day and Grade columns
-        cell.innerHTML = `${subject}<br>${selectedTeacher}`;
-        cell.classList.add("assigned"); // Optional: highlight assigned cells
-    });
+function showCustomConfirm(message, callback) {
+  const confirmModal = document.getElementById('customConfirm');
+  document.getElementById('confirmMessage').innerText = message;
+  confirmModal.style.display = 'block';
+  confirmCallback = callback;
 }
 
-function getTimeIndex(time) {
-    const timeSlots = [
-        "8:00-8:40", "8:40-9:20", "9:20-9:50", "9:50-10:30", 
-        "10:30-11:10", "11:10-11:30", "11:30-12:10", "12:10-12:50", 
-        "12:50-2:00", "2:00-2:40", "2:40-3:20", "3:20-4:20"
-    ];
-    return timeSlots.indexOf(time);
+// Attach event listeners to buttons outside the modal HTML definition
+document.getElementById('confirmYes').onclick = function() {
+  if (confirmCallback) {
+    confirmCallback(true); // Callback is executed when 'Yes' is pressed
+  }
+  document.getElementById('customConfirm').style.display = 'none'; // Close modal
+};
 
-    // Determine the grades to which this subject should be added
-    let targetGrades;
-    switch (gradeRange) {
-        case "1-3":
-            targetGrades = ["Grade 1A", "Grade 1B", "Grade 2A", "Grade 2B", "Grade 3A", "Grade 3B"];
-            break;
-        case "4-6":
-            targetGrades = ["Grade 4A", "Grade 4B", "Grade 5A", "Grade 5B", "Grade 6A", "Grade 6B"];
-            break;
-        case "7-9":
-            targetGrades = ["Grade 7A", "Grade 7B", "Grade 8A", "Grade 8B", "Grade 9A", "Grade 9B"];
-            break;
-        case "10-12":
-            targetGrades = ["Grade 10A", "Grade 10B", "Grade 11A", "Grade 11B", "Grade 12A", "Grade 12B"];
-            break;
-        default:
-            alert("Invalid grade range selected.");
-            return;
-    }
+document.getElementById('confirmNo').onclick = function() {
+  if (confirmCallback) {
+    confirmCallback(false); // Callback is executed when 'No' is pressed
+  }
+  document.getElementById('customConfirm').style.display = 'none'; // Close modal
+};
 
-    // Add the subject to each grade in the selected range
-    targetGrades.forEach(grade => {
-        if (!subjects[grade]) {
-            subjects[grade] = [];
-        }
-        subjects[grade].push(newSubjectName);
-    });
+// ?? Function to update the teacher lists in both views
+function updateTeacherLists() {
+  const teacherList = document.getElementById('teacher-list');
+  const wizTeacherList = document.getElementById('wiz-teacher-list');
+  teacherList.innerHTML = '';
+  wizTeacherList.innerHTML = '';
 
-    // Refresh the subject selector and clear input fields
-    showSubjectSelector();
-    document.getElementById("newSubjectName").value = ""; // Clear subject input
-    document.getElementById("gradeRangeSelect").value = ""; // Reset grade range selection
-    alert(`Subject "${newSubjectName}" added to ${gradeRange} successfully!`);
-}
-function assignSelectedGradeLessons() {  
-    const selectedGrade = document.getElementById("gradeSelect").value; // Get selected grade
-    const selectedDay = document.getElementById("daySelect").value; // Get selected day
-
-    if (!selectedGrade || !selectedDay) {
-        alert("Please select a grade and a day.");
-        return;
-    }
-
-    const timetableBody = document.getElementById("timetableBody");
-    const timeSlots = [
-        "8:00-8:40", "8:40-9:20", "9:20-9:50", 
-        "9:50-10:30", "10:30-11:10", "11:10-11:30",
-        "11:30-12:10", "12:10-12:50", "12:50-2:00",
-        "2:00-2:40", "2:40-3:20", "3:20-4:20"
-    ];
-
-    // Shuffle slots for uneven distribution
-    const allowedSlots = [
-        "8:00-8:40", "8:40-9:20", "9:50-10:30",
-        "10:30-11:10", "11:30-12:10", "12:10-12:50",
-        "2:00-2:40", "2:40-3:20"
-    ];
-    const shuffledSlots = shuffleArray([...allowedSlots]);
-
-    // Tracker to avoid collisions
-    const slotUsageTracker = {};
-    allowedSlots.forEach(slot => (slotUsageTracker[`${selectedDay}-${slot}`] = null));
-
-    // Define core and weekly subjects
-    const coreSubjectsMap = {
-        "1-3": ["Kiswahili", "English", "Maths"],
-        "4-6": ["English", "Mathematics", "Kiswahili", "Science and Technology"],
-        "7-9": ["Integrated Science", "Creative Arts & Sports", "Mathematics", "English"],
-        "10-12": ["Mathematics", "Biology", "Chemistry", "Physics", "English", "Kiswahili"]
-    };
-
-    const weeklySubjectsMap = {
-
-        "4-6": ["Religious Education", "Agriculture and Nutrition", "Social Studies", "Creative Arts"],
-        "7-9": ["Social Studies", "Agriculture", "Pre-Technical Studies", "Kiswahili", "Religious Education"],
-        "10-12": ["Agriculture", "Computer Studies", "Home Science", "Drawing and Design", "Physical Education"]
-    };
-
-    // Determine grade section and core/weekly subjects
-    let gradeSection = null;
-    if (/^Grade [1-3]/.test(selectedGrade)) gradeSection = "1-3";
-    else if (/^Grade [4-6]/.test(selectedGrade)) gradeSection = "4-6";
-    else if (/^Grade [7-9]/.test(selectedGrade)) gradeSection = "7-9";
-    else if (/^Grade 1[0-2]/.test(selectedGrade)) gradeSection = "10-12";
-
-    const coreSubjects = coreSubjectsMap[gradeSection] || [];
-    const weeklySubjects = weeklySubjectsMap[gradeSection] || [];
-    const otherSubjects = subjects[selectedGrade].filter(
-        sub => !coreSubjects.includes(sub) && !weeklySubjects.includes(sub)
-    );
-
-    // Create or find the row for the selected grade and day
-    let row = [...timetableBody.rows].find(row => row.cells[0]?.textContent === selectedDay && row.cells[1]?.textContent === selectedGrade);
-
-    if (!row) {
-        row = timetableBody.insertRow();
-        row.insertCell().textContent = selectedDay;
-        row.insertCell().textContent = selectedGrade;
-
-        // Create empty cells for each time slot (adjust for day and grade columns)
-        for (let i = 0; i < timeSlots.length; i++) {
-            row.insertCell();
-        }
-    }
-
-    // Allocate core subjects first
-    coreSubjects.forEach(subject => {
-        for (let slot of shuffledSlots) {
-            const trackerKey = `${selectedDay}-${slot}`;
-            const cellIndex = timeSlots.indexOf(slot) + 2;
-
-            if (!slotUsageTracker[trackerKey] && cellIndex >= 2 && cellIndex < row.cells.length) {
-                row.cells[cellIndex].innerHTML = subject;
-                row.cells[cellIndex].classList.add("assigned");
-                slotUsageTracker[trackerKey] = subject;
-                break;
-            }
-        }
-    });
-
-    // Allocate weekly subjects
-    weeklySubjects.forEach(subject => {
-        for (let slot of shuffledSlots) {
-            const trackerKey = `${selectedDay}-${slot}`;
-            const cellIndex = timeSlots.indexOf(slot) + 2;
-
-            if (!slotUsageTracker[trackerKey] && cellIndex >= 2 && cellIndex < row.cells.length) {
-                row.cells[cellIndex].innerHTML = subject;
-                row.cells[cellIndex].classList.add("assigned");
-                slotUsageTracker[trackerKey] = subject;
-                break;
-            }
-        }
-    });
-
-    // Allocate other subjects
-    otherSubjects.forEach(subject => {
-        for (let slot of shuffledSlots) {
-            const trackerKey = `${selectedDay}-${slot}`;
-            const cellIndex = timeSlots.indexOf(slot) + 2;
-
-            if (!slotUsageTracker[trackerKey] && cellIndex >= 2 && cellIndex < row.cells.length) {
-                row.cells[cellIndex].innerHTML = subject;
-                row.cells[cellIndex].classList.add("assigned");
-                slotUsageTracker[trackerKey] = subject;
-                break;
-            }
-        }
-    });
-
-    // Create and show the success message
-    const successMessage = document.createElement('p');
-    successMessage.textContent = `Timetable for ${selectedGrade} on ${selectedDay} has been successfully generated!`;
-    successMessage.style.color = 'red';  // Red color for success
-    successMessage.style.fontWeight = 'bold';  // Bold text
-    successMessage.style.fontSize = '14px';  // Adjust font size
-    successMessage.style.position = 'fixed';  // Position fixed on screen
-    successMessage.style.top = '50%';  // Center vertically
-    successMessage.style.left = '50%';  // Center horizontally
-    successMessage.style.transform = 'translate(-50%, -50%)';  // Center the element perfectly
-    successMessage.style.padding = '10px';  // Add some padding
-    successMessage.style.backgroundColor = '#4CAF50';  // white background for better visibility
-    successMessage.style.borderRadius = '10px';  // Rounded corners
-    successMessage.id = 'timetableSuccessMessage';  // ID to manage the message later
-    
-    // Append the success message to the body
-    document.body.appendChild(successMessage);
-
-    // Remove the success message after 3 seconds
-    setTimeout(() => {
-        successMessage.remove();
-    }, 3000);
+  teachers.forEach((t, index) => {
+    const itemHTML = `
+      <li>
+        ${t.name} (T${t.id})
+        <button onclick="deleteTeacher(${index})" style="margin-left:10px; color: red; border: none; background: transparent; cursor: pointer;">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </li>
+    `;
+    teacherList.innerHTML += itemHTML;
+    wizTeacherList.innerHTML += itemHTML;
+  });
 }
 
+// ?? Function to delete teacher by index with a custom prompt
+function deleteTeacher(index) {
+  showCustomConfirm(`Are you sure you want to delete ${teachers[index].name}?`, function(confirmed) {
+    if (confirmed) {
+      // Remove teacher from the teachers array
+      teachers.splice(index, 1);
 
-// Shuffle function for uneven distribution
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      // Save the updated teachers array to localStorage
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+
+      // Re-render the teacher list
+      updateTeacherLists();
     }
-    return array;
+  });
 }
 
+// ?? Custom confirm function with colored alert
+function showCustomConfirm(message, callback) {
+  const confirmBox = document.createElement('div');
+  confirmBox.className = 'custom-confirm';
 
-
-    function extractAndPrintTimetableForGrade() {
-        // Get the selected grade
-        const gradeSelect = document.getElementById("gradeSelect");
-        const selectedGrade = gradeSelect.value;
-
-        if (!selectedGrade) {
-            alert("Please select a grade to extract the timetable.");
-            return;
-        }
-
-        // Find the timetable body and rows
-        const timetableBody = document.getElementById("timetableBody");
-        const rows = [...timetableBody.rows].filter(row => row.cells[1]?.textContent === selectedGrade);
-
-        if (rows.length === 0) {
-            alert(`No timetable found for ${selectedGrade}.`);
-            return;
-        }
-
-        // Create a new printable window
-        const printWindow = window.open("", "Print Timetable", "height=600,width=800");
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Timetable for ${selectedGrade}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; }
-                        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-                        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-                        th { background-color: #f2f2f2; }
-                    </style>
-                </head>
-                <body>
-                    <h2 style="text-align: center;">Timetable for ${selectedGrade}</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Day</th>
-                                <th>Grade</th>
-                                <th>8:00-8:40</th>
-                                <th>8:40-9:20</th>
-                                <th>9:20-9:50</th>
-                                <th>9:50-10:30</th>
-                                <th>10:30-11:10</th>
-                                <th>11:10-11:30</th>
-                                <th>11:30-12:10</th>
-                                <th>12:10-12:50</th>
-                                <th>12:50-2:00</th>
-                                <th>2:00-2:40</th>
-                                <th>2:40-3:20</th>
-                                <th>3:20-4:20</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `);
-
-        // Add rows for the selected grade to the printable window
-        rows.forEach(row => {
-            printWindow.document.write("<tr>");
-            [...row.cells].forEach(cell => {
-                printWindow.document.write(`<td>${cell.innerHTML}</td>`);
-            });
-            printWindow.document.write("</tr>");
-        });
-
-        // Close the table and the document
-        printWindow.document.write(`
-                        </tbody>
-                    </table>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
-
-        // Automatically open the print dialog
-        printWindow.print();
-    
-}
-
-        function downloadTimetablePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape' });
-
-            let htmlTable = document.getElementById('timetable');
-            let rows = htmlTable.rows;
-
-            let startY = 10;
-            let pageHeight = doc.internal.pageSize.height;
-            let cellPadding = 2;
-
-            doc.setFontSize(10); // Set font size to 10 to reduce text size
-
-            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-                const row = rows[rowIndex];
-                let currentX = 10; // Margin from the left
-                let rowHeight = 10; // Fixed height for each row
-
-                for (let cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
-                    const cell = row.cells[cellIndex];
-                    const cellContent = cell.textContent.trim();
-                    const cellWidth = 20; // Fixed width for each cell
-
-                    doc.rect(currentX, startY, cellWidth, rowHeight); // Draw border
-                    doc.text(cellContent, currentX + cellPadding, startY + rowHeight / 2 + 2); // Center text in the cell
-                    currentX += cellWidth; // Move to next cell position
-                }
-
-                startY += rowHeight; // Move to next row
-                if (startY + rowHeight > pageHeight) {
-                    doc.addPage();
-                    startY = 10; // Reset position for the new page
-                }
-            }
-
-            doc.save('timetable.pdf');
-        }
-function assignSubject() {
-    const selectedGrade = document.getElementById("gradeSelect").value;
-    const selectedDay = document.getElementById("daySelect").value;
-    const selectedTeacher = document.getElementById("teacherSelect").value;
-    const selectedTime = document.getElementById("timeSelect").value;
-    const selectedSubjects = [...document.querySelectorAll('#subjectList input[type="checkbox"]:checked')]
-        .map(input => input.value);
-
-    if (!selectedGrade || !selectedDay || !selectedTeacher || selectedSubjects.length === 0) {
-        showErrorMessage("Please select a grade, day, teacher, and at least one subject.");
-        return;
-    }
-
-    const timetableBody = document.getElementById("timetableBody");
-    let row = [...timetableBody.rows].find(row => row.cells[0].textContent === selectedDay && row.cells[1].textContent === selectedGrade);
-    if (!row) {
-        row = timetableBody.insertRow();
-        row.insertCell().textContent = selectedDay;
-        row.insertCell().textContent = selectedGrade;
-        for (let i = 0; i < 12; i++) { // Create empty cells for time slots
-            row.insertCell();
-        }
-    }
-
-    const timeIndex = getTimeIndex(selectedTime);
-    selectedSubjects.forEach(subject => {
-        const cell = row.cells[timeIndex + 2]; // Offset by 2 for Day and Grade columns
-        cell.innerHTML = `${subject}<br>${selectedTeacher}`;
-        cell.classList.add("assigned"); // Optional: highlight assigned cells
-    });
- // Create and show the success message
-    const successMessage = document.createElement('p');
- successMessage.textContent = `Subject successfully assigned to ${selectedTeacher} for ${selectedGrade} on ${selectedDay}!`;
+  // Style the confirmation box
+  confirmBox.style.position = 'fixed';
+  confirmBox.style.top = '50%';
+  confirmBox.style.left = '50%';
+  confirmBox.style.transform = 'translate(-50%, -50%)';
+  confirmBox.style.backgroundColor = '#f8d7da';
+  confirmBox.style.color = '#721c24';
+  confirmBox.style.padding = '20px 40px';
+  confirmBox.style.borderRadius = '10px';
+  confirmBox.style.textAlign = 'center';
+  confirmBox.style.zIndex = '9999';
+  confirmBox.style.fontSize = '16px';
+  confirmBox.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)';
   
-      successMessage.style.color = 'red';  // Red color for success
-    successMessage.style.fontWeight = 'bold';  // Bold text
-    successMessage.style.fontSize = '14px';  // Adjust font size
-    successMessage.style.position = 'fixed';  // Position fixed on screen
-    successMessage.style.top = '50%';  // Center vertically
-    successMessage.style.left = '50%';  // Center horizontally
-    successMessage.style.transform = 'translate(-50%, -50%)';  // Center the element perfectly
-    successMessage.style.padding = '10px';  // Add some padding
-    successMessage.style.backgroundColor = '#4CAF50';  // white background for better visibility
-    successMessage.style.borderRadius = '10px';  // Rounded corners
-    successMessage.id = 'timetableSuccessMessage';  // ID to manage the message later
+  confirmBox.innerHTML = `
+    <p>${message}</p>
+    <button id="confirm-yes" style="margin-right: 10px; padding: 5px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Yes</button>
+    <button id="confirm-no" style="padding: 5px 15px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">No</button>
+  `;
+
+  // Append confirm box to body
+  document.body.appendChild(confirmBox);
+
+  // Add event listeners for buttons
+  document.getElementById('confirm-yes').onclick = function() {
+    callback(true);  // User confirmed
+    confirmBox.remove();  // Remove the confirm box
+  };
+
+  document.getElementById('confirm-no').onclick = function() {
+    callback(false);  // User canceled
+    confirmBox.remove();  // Remove the confirm box
+  };
+}
+
+
+function logout() {
+  // Show the login section again
+  document.getElementById('login-page').style.display = 'block';
+
+  // Hide the main view
+  document.getElementById('single-view').style.display = 'none';
+
+  // Optionally clear login fields
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+
+  // Show success alert
+  showCustomAlert('You have successfully logged out.', 'green');  // Green alert for success
+}
+function showCustomAlert(message, color) {
+  const alertBox = document.createElement('div');
+  alertBox.className = 'custom-alert';
   
-    
-    // Append the success message to the body
-    document.body.appendChild(successMessage);
+  // Style the alert box
+  alertBox.style.position = 'fixed';
+  alertBox.style.top = '50%';
+  alertBox.style.left = '50%';
+  alertBox.style.transform = 'translate(-50%, -50%)';
+  alertBox.style.backgroundColor = color;
+  alertBox.style.color = 'white';
+  alertBox.style.padding = '15px 30px';
+  alertBox.style.margin = '10px 0';
+  alertBox.style.borderRadius = '5px';
+  alertBox.style.textAlign = 'center';
+  alertBox.style.zIndex = '9999'; // Ensures it is on top of other elements
+  alertBox.style.fontSize = '16px';
+  alertBox.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)'; // Optional shadow for better visibility
+  alertBox.innerText = message;
 
-    // Remove the success message after 3 seconds
-    setTimeout(() => {
-        successMessage.remove();
-    }, 3000);
+  // Add the alert to the body
+  document.body.appendChild(alertBox);
+
+  // Automatically remove the alert after 3 seconds
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
 }
 
-// Function to show error message in a styled format
-function showErrorMessage(message) {
-    const errorMessage = document.createElement('p');
-    errorMessage.textContent = message;
-    errorMessage.style.color = 'white';  // Red color for error
-    errorMessage.style.fontWeight = 'bold';  // Bold text
-    errorMessage.style.fontSize = '14px';  // Adjust font size
-    errorMessage.style.position = 'fixed';  // Fixed position on screen
-    errorMessage.style.top = '50%';  // Center vertically
-    errorMessage.style.left = '50%';  // Center horizontally
-    errorMessage.style.transform = 'translate(-50%, -50%)';  // Center the element perfectly
-    errorMessage.style.padding = '10px';  // Add some padding
-    errorMessage.style.backgroundColor = '#F44336';  // Red background for error message
-    errorMessage.style.borderRadius = '10px';  // Rounded corners
-    errorMessage.id = 'errorMessage';  // ID to manage the message later
-    
-    // Append the error message to the body
-    document.body.appendChild(errorMessage);
 
-    // Remove the error message after 3 seconds
-    setTimeout(() => {
-        errorMessage.remove();
-    }, 3000);
+
+function extractFromCombinedTimetable() {
+  const combined = document.querySelector("#combined-timetable table");
+  if (!combined) {
+    return showAlert("Combined timetable not found!", "error");
+  }
+
+  const rows = Array.from(combined.querySelectorAll("tbody tr"));
+  const header = Array.from(combined.querySelectorAll("thead th")).slice(2); // Time periods
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
+  const classTimetables = {};
+  const teacherTimetables = {};
+
+  for (let row of rows) {
+    const cells = Array.from(row.querySelectorAll("td"));
+    const day = cells[0].innerText.trim();
+    const grade = cells[1].innerText.trim();
+
+    if (!classTimetables[grade]) {
+      classTimetables[grade] = {};
+      days.forEach(d => classTimetables[grade][d] = new Array(header.length).fill(""));
+    }
+
+    for (let i = 2; i < cells.length; i++) {
+      const subjectText = cells[i].innerText.trim();
+      classTimetables[grade][day][i - 2] = subjectText;
+
+      const match = subjectText.match(/\(T(\d+)\)/);
+      if (match) {
+        const tid = "T" + match[1];
+        if (!teacherTimetables[tid]) {
+          teacherTimetables[tid] = {};
+          days.forEach(d => teacherTimetables[tid][d] = new Array(header.length).fill(""));
+        }
+        teacherTimetables[tid][day][i - 2] = `${subjectText.split(" (")[0]} (${grade})`;
+      }
+    }
+  }
+
+  // Render the results
+  const output = document.getElementById("extracted-timetables");
+  output.innerHTML = "";
+
+  // Class Timetables
+  for (let grade in classTimetables) {
+    let html = `<h3 style="color:#1a237e; margin-top:30px;">Class Timetable - ${grade}</h3>`;
+    html += buildTable(classTimetables[grade], header);
+
+    output.innerHTML += `
+      <div class="extracted-block" style="margin-bottom: 40px;">
+        ${html}
+        <button onclick="printThisTimetable(this)" style="margin-top: 10px; background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+          <i class="fas fa-print"></i> Print This Timetable
+        </button>
+      </div>`;
+  }
+
+  // Teacher Timetables
+  for (let tid in teacherTimetables) {
+    let html = `<h3 style="color:#2e7d32; margin-top:30px;">Teacher Timetable - ${tid}</h3>`;
+    html += buildTable(teacherTimetables[tid], header);
+
+    output.innerHTML += `
+      <div class="extracted-block" style="margin-bottom: 40px;">
+        ${html}
+        <button onclick="printThisTimetable(this)" style="margin-top: 10px; background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+          <i class="fas fa-print"></i> Print This Timetable
+        </button>
+      </div>`;
+  }
 }
 
-function getTimeIndex(time) {
-    const timeSlots = [
-        "8:00-8:40", "8:40-9:20", "9:20-9:50", "9:50-10:30", 
-        "10:30-11:10", "11:10-11:30", "11:30-12:10", "12:10-12:50", 
-        "12:50-2:00", "2:00-2:40", "2:40-3:20", "3:20-4:20"
-    ];
-    return timeSlots.indexOf(time);
+function showAlert(message, type) {
+  const alertBox = document.createElement("div");
+  alertBox.textContent = message;
+  alertBox.style.padding = "5px";
+  alertBox.style.margin = "5px 0";
+  alertBox.style.borderRadius = "3px";
+  alertBox.style.fontSize = "16px";
+  alertBox.style.backgroundColor = "#d32f2f"; // Red background
+  alertBox.style.color = "white"; // White text color
+  alertBox.style.border = "1px solid #b71c1c"; // Dark red border
+
+  document.body.appendChild(alertBox);
+
+  // Remove the alert after 3 seconds
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
 }
-// Save timetable to local storage
-function saveTimetableToLocalStorage() {
-    const timetableBody = document.getElementById('timetableBody');
-    const rows = [...timetableBody.rows].map(row => {
-        return [...row.cells].map(cell => cell.innerHTML);
+
+function buildTable(schedule, headers) {
+  let html = `<div style="overflow-x:auto;"><table style="border-collapse: collapse; width: 100%; font-size: 12px;"><thead><tr><th style="border: 1px solid #000; padding: 6px;">Day</th>`;
+  headers.forEach(h => {
+    html += `<th style="border: 1px solid #000; padding: 6px;">${h.innerText}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  for (let day in schedule) {
+    html += `<tr><td style="border: 1px solid #000; padding: 6px;">${day}</td>`;
+    schedule[day].forEach(period => {
+      html += `<td style="border: 1px solid #000; padding: 6px; text-align: center;">${period || ''}</td>`;
     });
-    localStorage.setItem('timetableData', JSON.stringify(rows));
+    html += '</tr>';
+  }
+
+  html += '</tbody></table></div>';
+  return html;
 }
 
-// Load timetable from local storage
-function loadTimetableFromLocalStorage() {
-    const timetableBody = document.getElementById('timetableBody');
-    const savedData = localStorage.getItem('timetableData');
+ function printThisTimetable(button) {
+  const timetableBlock = button.closest(".extracted-block").cloneNode(true);
+  timetableBlock.querySelector("button").remove();
 
-    if (savedData) {
-        const rows = JSON.parse(savedData);
+  const logoURL = "https://i.imgur.com/uWrz8rt.png";
+  const headerText = timetableBlock.querySelector("h3")?.innerText || "Timetable";
+  const isClass = headerText.toLowerCase().includes("class timetable");
 
-        // Clear current table
-        timetableBody.innerHTML = '';
+  const headerHTML = `
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="${logoURL}" style="height: 80px; margin-bottom: 10px;"><br>
+      <h2 style="margin: 0; font-size: 24px; font-family: Arial; font-weight: bold;">NACHU JUNIOR SCHOOL</h2>
+      <h3 style="margin: 0; font-size: 18px; font-family: Arial; font-weight: bold;">${headerText}</h3>
+    </div>
+  `;
 
-        rows.forEach(rowData => {
-            const row = timetableBody.insertRow();
-            rowData.forEach(cellData => {
-                const cell = row.insertCell();
-                cell.innerHTML = cellData;
+  // Enhance table styling
+  const table = timetableBlock.querySelector("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+  table.style.fontFamily = "Arial, sans-serif";
+  table.style.fontSize = "12pt";
+  table.style.tableLayout = "fixed"; // Important to make it fit
+  table.style.wordWrap = "break-word";
+  table.style.overflowWrap = "break-word";
 
-                // If the cell has data, add the "assigned" class
-                if (cellData.trim()) {
-                    cell.classList.add('assigned');
-                }
-            });
-        });
-    }
-}
+  table.querySelectorAll("th").forEach(th => {
+    th.style.border = "2px solid black";
+    th.style.padding = "8px";
+    th.style.fontWeight = "bold";
+    th.style.backgroundColor = "#f1f1f1";
+    th.style.textAlign = "center";
+  });
 
-// Function to handle assigning subjects and saving the timetable
-function assignSubjectAndSave(selectedDay, selectedGrade, selectedTime, selectedSubjects, selectedTeacher) {
-    const timetableBody = document.getElementById('timetableBody');
-    let row = [...timetableBody.rows].find(
-        row => row.cells[0].textContent === selectedDay && row.cells[1].textContent === selectedGrade
-    );
+  table.querySelectorAll("td").forEach(td => {
+    td.style.border = "2px solid black";
+    td.style.padding = "8px";
+    td.style.textAlign = "center";
+    td.style.wordWrap = "break-word";
+    td.style.overflowWrap = "break-word";
+  });
 
-    // If no row exists for the selected day and grade, create one
-    if (!row) {
-        row = timetableBody.insertRow();
-        row.insertCell().textContent = selectedDay; // Day column
-        row.insertCell().textContent = selectedGrade; // Grade column
-        for (let i = 0; i < 12; i++) {
-            row.insertCell(); // Create empty cells for time slots
+  const printCSS = `
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 0.5cm;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      table {
+        width: 100%;
+        table-layout: fixed;
+      }
+      th, td {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      ${isClass ? `
+        .print-block {
+          page-break-inside: avoid;
+          transform: scale(0.98); /* Subtle shrink to fit page */
+          transform-origin: top left;
         }
-    }
+      ` : ''}
+    </style>
+  `;
 
-    // Get the time index and assign the subject
-    const timeIndex = getTimeIndex(selectedTime);
-    const cell = row.cells[timeIndex + 2]; // Offset by 2 for Day and Grade columns
-    cell.innerHTML = `${selectedSubjects.join('<br>')}<br>${selectedTeacher}`;
-    cell.classList.add('assigned');
-
-    // Save the updated timetable to local storage
-    saveTimetableToLocalStorage();
+  const printWindow = window.open('', '', 'width=1000,height=800');
+  printWindow.document.write(`<html><head><title>Print Timetable</title>${printCSS}</head><body>`);
+  printWindow.document.write(`<div class="print-block">${headerHTML}${timetableBlock.innerHTML}</div>`);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
 }
-
-// Clear the timetable and remove it from local storage
-function clearTimetable() {
-    const timetableBody = document.getElementById('timetableBody');
-    timetableBody.innerHTML = ''; // Clear the table
-    localStorage.removeItem('timetableData'); // Clear the data from local storage
-}
-
-// Load the timetable from local storage when the page loads
-document.addEventListener('DOMContentLoaded', loadTimetableFromLocalStorage);
-
-  // Enable drag-and-drop for timetable cells
-        function enableDragAndDrop() {
-            const cells = document.querySelectorAll('#timetableBody td');
-
-            cells.forEach(cell => {
-                // Allow dragging
-                cell.setAttribute('draggable', true);
-
-                // Drag start event
-                cell.addEventListener('dragstart', event => {
-                    event.dataTransfer.setData('text/plain', event.target.innerHTML);
-                    event.target.classList.add('dragging');
-                });
-
-                // Drag over event
-                cell.addEventListener('dragover', event => {
-                    event.preventDefault(); // Allow drop
-                    event.target.classList.add('drag-over');
-                });
-
-                // Drag leave event
-                cell.addEventListener('dragleave', () => {
-                    event.target.classList.remove('drag-over');
-                });
-
-                // Drop event
-                cell.addEventListener('drop', event => {
-                    event.preventDefault();
-
-                    const draggedContent = event.dataTransfer.getData('text/plain'); // Content being dragged
-                    const targetContent = event.target.innerHTML; // Content in the target cell
-
-                    // Swap contents
-                    event.target.innerHTML = draggedContent;
-                    const draggingCell = document.querySelector('.dragging');
-                    draggingCell.innerHTML = targetContent;
-
-                    // Cleanup styles
-                    event.target.classList.remove('drag-over');
-                    draggingCell.classList.remove('dragging');
-                });
-
-                // Drag end event
-                cell.addEventListener('dragend', () => {
-                    cell.classList.remove('dragging');
-                });
-            });
-        }
-
-        // Initialize drag-and-drop after the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', enableDragAndDrop);
-    </script>
+</script>
+ 
 </body>
 </html>
