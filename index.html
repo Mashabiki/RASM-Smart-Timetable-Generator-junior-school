@@ -85,18 +85,30 @@
    footer {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
-  background-color: #FFC107;
-  color: #000;
+  background-color: #333;
+  color: white;
   text-align: center;
-  padding: 15px;
-  font-size: 12px;
-  font-weight: bold;
-  border-top: 4px solid #FF5722;
-  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  padding: 10px 0;
+  font-size: 17px;
+  overflow: hidden;
 }
+
+.footer-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 32s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
  
   </style>
 </head>
@@ -385,7 +397,12 @@
   <button id="confirmNo" style="color: white; background: red; border: none; padding: 10px;">No</button>
 </div>
 <footer>
-  2025 Nachu Junior School | All rights reserved. | Powered by RASM Technologies
+  <div class="footer-text">
+ Streamline Your School With RASM Tech!
+Generate accurate class timetables per stream and get automatic teacher timetables in seconds  all aligned with Ministry of Education guidelines. Say goodbye to manual scheduling and hello to smart, efficient school management. Powered by RASM Technologies.
+
+ 2025 Nachu Junior School | All rights reserved. | Powered by RASM Technologies
+  </div>
 </footer>
 </body>
 
