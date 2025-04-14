@@ -225,18 +225,7 @@
 
       <select id="assign-grade">
         <option disabled selected>Select Grade</option>
-        <option value="4">Grade 4</option>
-        <option value="4A">Grade 4A</option>
-        <option value="4B">Grade 4B</option>
-        <option value="4C">Grade 4C</option>
-        <option value="5">Grade 5</option>
-        <option value="5A">Grade 5A</option>
-        <option value="5B">Grade 5B</option>
-        <option value="5C">Grade 5C</option>
-        <option value="6">Grade 6</option>
-        <option value="6A">Grade 6A</option>
-        <option value="6B">Grade 6B</option>
-        <option value="6C">Grade 6C</option>
+ 
         <option value="7">Grade 7</option>
         <option value="7A">Grade 7A</option>
         <option value="7B">Grade 7B</option>
@@ -265,18 +254,7 @@
   <h2 style="color: #2e7d32; text-align: center;">Select Grades to Generate Timetable</h2>
 
   <form id="grade-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-    <label><input type="checkbox" name="grade" value="4"> Grade 4</label>
-    <label><input type="checkbox" name="grade" value="4A"> Grade 4A</label>
-    <label><input type="checkbox" name="grade" value="4B"> Grade 4B</label>
-    <label><input type="checkbox" name="grade" value="4C"> Grade 4C</label>
-    <label><input type="checkbox" name="grade" value="5"> Grade 5</label>
-    <label><input type="checkbox" name="grade" value="5A"> Grade 5A</label>
-    <label><input type="checkbox" name="grade" value="5B"> Grade 5B</label>
-    <label><input type="checkbox" name="grade" value="5C"> Grade 5C</label>
-    <label><input type="checkbox" name="grade" value="6"> Grade 6</label>
-    <label><input type="checkbox" name="grade" value="6A"> Grade 6A</label>
-    <label><input type="checkbox" name="grade" value="6B"> Grade 6B</label>
-    <label><input type="checkbox" name="grade" value="6C"> Grade 6C</label>
+
     <label><input type="checkbox" name="grade" value="7"> Grade 7</label>
     <label><input type="checkbox" name="grade" value="7A"> Grade 7A</label>
     <label><input type="checkbox" name="grade" value="7B"> Grade 7B</label>
@@ -317,18 +295,7 @@
 <h2 style="background-color: lightgreen; color: black; padding: 8px 12px; border-radius: 4px;">Step 2:Assign Subjects to Teachers  </h2>
        <select id="assign-grade">
         <option disabled selected>Select Grade</option>
-        <option value="4">Grade 4</option>
-        <option value="4A">Grade 4A</option>
-        <option value="4B">Grade 4B</option>
-        <option value="4C">Grade 4C</option>
-        <option value="5">Grade 5</option>
-        <option value="5A">Grade 5A</option>
-        <option value="5B">Grade 5B</option>
-        <option value="5C">Grade 5C</option>
-        <option value="6">Grade 6</option>
-        <option value="6A">Grade 6A</option>
-        <option value="6B">Grade 6B</option>
-        <option value="6C">Grade 6C</option>
+     
         <option value="7">Grade 7</option>
         <option value="7A">Grade 7A</option>
         <option value="7B">Grade 7B</option>
@@ -1241,21 +1208,32 @@ function extractFromCombinedTimetable() {
 function showAlert(message, type) {
   const alertBox = document.createElement("div");
   alertBox.textContent = message;
-  alertBox.style.padding = "5px";
-  alertBox.style.margin = "5px 0";
-  alertBox.style.borderRadius = "3px";
+
+  alertBox.style.position = "fixed";
+  alertBox.style.top = "50%";
+  alertBox.style.left = "50%";
+  alertBox.style.transform = "translate(-50%, -50%)";
+
+  alertBox.style.padding = "15px 30px";
+  alertBox.style.margin = "0";
+  alertBox.style.borderRadius = "8px";
   alertBox.style.fontSize = "16px";
+  alertBox.style.fontWeight = "bold";
+  alertBox.style.textAlign = "center";
+  alertBox.style.zIndex = "9999";
+
+  // Styling based on alert type (can be extended if needed)
   alertBox.style.backgroundColor = "#d32f2f"; // Red background
-  alertBox.style.color = "white"; // White text color
-  alertBox.style.border = "1px solid #b71c1c"; // Dark red border
+  alertBox.style.color = "white";
+  alertBox.style.border = "2px solid #b71c1c";
 
   document.body.appendChild(alertBox);
 
-  // Remove the alert after 3 seconds
   setTimeout(() => {
     alertBox.remove();
   }, 3000);
 }
+
 
 function buildTable(schedule, headers) {
   let html = `<div style="overflow-x:auto;"><table style="border-collapse: collapse; width: 100%; font-size: 12px;"><thead><tr><th style="border: 1px solid #000; padding: 6px;">Day</th>`;
