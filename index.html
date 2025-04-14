@@ -82,7 +82,7 @@
     }
     .hidden { display: none; }
 
-   footer {
+ footer {
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -90,14 +90,14 @@
   color: white;
   text-align: center;
   padding: 10px 0;
-  font-size: 17px;
+  font-size: 16px;
   overflow: hidden;
 }
 
 .footer-text {
   display: inline-block;
   white-space: nowrap;
-  animation: marquee 32s linear infinite;
+  animation: marquee 30s linear infinite;
 }
 
 @keyframes marquee {
@@ -108,7 +108,6 @@
     transform: translateX(-100%);
   }
 }
-
  
   </style>
 </head>
@@ -116,7 +115,7 @@
 <!-- Login Section -->
 <div id="login-page" style="text-align: center; padding: 50px; background-color: #a5d6a7; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 300px; margin: 50px auto; border: 3px solid #4caf50;">
   <div class="logo">
-    <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" class="logo-img" style="width: 100px; margin-bottom: 20px;">
+    <img src=" https://i.imgur.com/55WxXPp.png " alt="School Logo" class="logo-img" style="width: 250px; margin-bottom: 20px;">
   </div>
   
   <h1 style="color: #0056b3; font-size: 28px; font-weight: bold;">RASM School Timetable Generator</h1>
@@ -139,7 +138,7 @@
   <!-- School Name and Logout Button -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="margin: 0; font-size: 24px; font-weight: bold; color: #2c3e50; display: flex; align-items: center;">
-      <img src="https://i.imgur.com/uWrz8rt.png" alt="School Logo" style="height: 36px; margin-right: 12px;">
+      <img src="https://i.imgur.com/55WxXPp.png " alt="School Logo" style="height: 150px; margin-right: 12px;">
       NACHU JUNIOR SCHOOL 
     </h2>
     <button onclick="logout()" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; border: none; cursor: pointer;">
@@ -401,7 +400,7 @@
  Streamline Your School With RASM Tech!
 Generate accurate class timetables per stream and get automatic teacher timetables in seconds  all aligned with Ministry of Education guidelines. Say goodbye to manual scheduling and hello to smart, efficient school management. Powered by RASM Technologies.
 
- 2025 Nachu Junior School | All rights reserved. | Powered by RASM Technologies
+ 2025 Nachu junior school  | All rights reserved. | Powered by RASM Technologies
   </div>
 </footer>
 </body>
@@ -581,28 +580,29 @@ function showCustomAlert(message, color) {
       if (!teacherSchedule[tid]) teacherSchedule[tid] = {};
       teacherSchedule[tid][`${day}-P${period}`] = true;
     }
-
-
 function generateSchedule(grade) {
   const schedule = {};
   const assign = assignments[grade];
   if (!assign) return null;
 
-  const mathPeriodsOnly = [0, 1, 3, 4, 6, 7]; // 8:00–12:55 periods
-
+  const mathPeriodsOnly = [0, 1, 2, 3, 4, 5, 6, 7]; // Mathematics only between 8:00–12:55
   const allowedPeriodsFor = (subj) => subj === 'Mathematics' ? mathPeriodsOnly : null;
+
+  const doubleLessonSubjects = ['Integrated Science', 'Pre-Technical', 'Agriculture', 'Creative Arts & Sports'];
+  const doubleLessonPlaced = {};
+  const doubleLessonDays = new Set();
+  const doubleLessonTimeGroups = {};
+  const timeGroup = (p) => p <= 2 ? 'early' : p <= 5 ? 'mid' : 'late';
 
   const assignedSubjects = [...subjects.daily, ...subjects.fourPerWeek];
   const allSubjectsPerWeek = {};
   subjects.daily.forEach(subj => allSubjectsPerWeek[subj] = 5);
   subjects.fourPerWeek.forEach(subj => allSubjectsPerWeek[subj] = 4);
 
-  // Initialize schedule
   days.forEach(day => {
     schedule[day] = Array(periods.length).fill('');
   });
 
-  // Reserve Breaks, Lunch, Games
   periods.forEach((label, i) => {
     if (label === 'Break' || label === 'Lunch' || label === 'Games') {
       days.forEach(day => schedule[day][i] = label);
@@ -614,6 +614,13 @@ function generateSchedule(grade) {
 
   const subjectAppearsAtPeriod = (period, subj) =>
     days.some(day => schedule[day][period]?.includes(subj));
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
 
   function findFreeSlotAvoidingPattern(tid, subj, avoid = {}, allowedPeriods = null) {
     const options = [];
@@ -634,57 +641,93 @@ function generateSchedule(grade) {
     return options.sort(() => Math.random() - 0.5)[0] || null;
   }
 
+  function findDoubleFreeSlot(tid, subj) {
+    doubleLessonTimeGroups[subj] ??= new Set();
+    const shuffledDays = [...days];
+    shuffleArray(shuffledDays);
+
+    for (let day of shuffledDays) {
+      if (doubleLessonDays.has(day)) continue;
+      const periodPairs = [...Array(periods.length - 1).keys()];
+      shuffleArray(periodPairs);
+
+      for (let p of periodPairs) {
+        const group = timeGroup(p);
+        if (doubleLessonTimeGroups[subj].has(group)) continue;
+
+        if (
+          !schedule[day][p] &&
+          !schedule[day][p + 1] &&
+          !['Break', 'Lunch', 'Games'].includes(periods[p]) &&
+          !['Break', 'Lunch', 'Games'].includes(periods[p + 1]) &&
+          isFree(tid, day, p + 1) &&
+          isFree(tid, day, p + 2)
+        ) {
+          doubleLessonTimeGroups[subj].add(group);
+          return { day, period: p };
+        }
+      }
+    }
+
+    return null;
+  }
+
   const subjectPlacedCount = {};
   assignedSubjects.forEach(s => subjectPlacedCount[s] = 0);
 
-  // STEP 1: Place daily subjects (5x)
-  subjects.daily.forEach(subj => {
+  // STEP 1: Place double lessons
+doubleLessonSubjects.forEach(subj => {
+  const tid = assign[subj];
+  const doubleSlot = findDoubleFreeSlot(tid, subj);
+  if (doubleSlot) {
+    const label = `${subj} (T${tid})`;
+    const styledCell = `<div style="background-color: #bbdefb; padding: 4px;">${label}</div>`; // Yellow highlight
+
+    schedule[doubleSlot.day][doubleSlot.period] = styledCell;
+    schedule[doubleSlot.day][doubleSlot.period + 1] = styledCell;
+
+    occupy(tid, doubleSlot.day, doubleSlot.period + 1);
+    occupy(tid, doubleSlot.day, doubleSlot.period + 2);
+
+    subjectPlacedCount[subj] += 2;
+    doubleLessonPlaced[subj] = true;
+    doubleLessonDays.add(doubleSlot.day);
+  }
+});
+
+
+  // STEP 2: Place regular lessons
+  assignedSubjects.forEach(subj => {
     const tid = assign[subj];
+    const maxCount = allSubjectsPerWeek[subj];
     const avoid = {};
-    let count = 0;
-    while (count < 5) {
+    let count = subjectPlacedCount[subj];
+
+    while (count < maxCount) {
       const slot = findFreeSlotAvoidingPattern(tid, subj, avoid, allowedPeriodsFor(subj));
       if (!slot) break;
       schedule[slot.day][slot.period] = `${subj} (T${tid})`;
       occupy(tid, slot.day, slot.period + 1);
-      avoid[slot.day] ??= [];
-      avoid[slot.day].push(slot.period);
       subjectPlacedCount[subj]++;
       count++;
+      avoid[slot.day] ??= [];
+      avoid[slot.day].push(slot.period);
     }
   });
 
-  // STEP 2: Place 4x subjects
-  subjects.fourPerWeek.forEach(subj => {
-    const tid = assign[subj];
-    const avoid = {};
-    let count = 0;
-    while (count < 4) {
-      const slot = findFreeSlotAvoidingPattern(tid, subj, avoid, allowedPeriodsFor(subj));
-      if (!slot) break;
-      schedule[slot.day][slot.period] = `${subj} (T${tid})`;
-      occupy(tid, slot.day, slot.period + 1);
-      avoid[slot.day] ??= [];
-      avoid[slot.day].push(slot.period);
-      subjectPlacedCount[subj]++;
-      count++;
-    }
-  });
-
-  // STEP 3: Fill any remaining empty lessons with under-assigned subjects only
+  // STEP 3: Try fill blanks intelligently
   for (let day of days) {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
+          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
-          const allowed = allowedPeriodsFor(subj);
           if (
             subjectPlacedCount[subj] < maxCount &&
             !subjectAppearsOnDay(day, subj) &&
             !subjectAppearsAtPeriod(p, subj) &&
-            isFree(tid, day, p + 1) &&
-            (!allowed || allowed.includes(p))
+            isFree(tid, day, p + 1)
           ) {
             schedule[day][p] = `${subj} (T${tid})`;
             occupy(tid, day, p + 1);
@@ -696,18 +739,15 @@ function generateSchedule(grade) {
     }
   }
 
-  // STEP 4: Final sweep to fill any remaining blanks safely
+  // STEP 4: Final fill using only free periods
   for (let day of days) {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
+          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
-          const allowed = allowedPeriodsFor(subj);
-          if (
-            subjectPlacedCount[subj] < maxCount &&
-            (!allowed || allowed.includes(p))
-          ) {
+          if (subjectPlacedCount[subj] < maxCount && isFree(tid, day, p + 1)) {
             schedule[day][p] = `${subj} (T${tid})`;
             occupy(tid, day, p + 1);
             subjectPlacedCount[subj]++;
@@ -718,7 +758,7 @@ function generateSchedule(grade) {
     }
   }
 
-  // STEP 5: Resolve teacher conflicts if any
+  // STEP 5: Resolve teacher conflicts
   const teacherMap = {};
   for (let d of days) {
     for (let p of lessonSlots) {
@@ -745,8 +785,23 @@ function generateSchedule(grade) {
             schedule[slot.day][slot.period] = `${subj} (T${tid})`;
             occupy(tid, slot.day, slot.period + 1);
             subjectPlacedCount[subj]++;
-          } else {
-            console.warn(`Unresolved conflict: ${subj} (T${tid}) in ${grade}`);
+          }
+        }
+      }
+    }
+  }
+
+  // STEP 6: Fill any remaining gaps no matter what
+  for (let day of days) {
+    for (let p of lessonSlots) {
+      if (!schedule[day][p]) {
+        for (let subj of assignedSubjects) {
+          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
+          const tid = assign[subj];
+          if (isFree(tid, day, p + 1)) {
+            schedule[day][p] = `${subj} (T${tid})`;
+            occupy(tid, day, p + 1);
+            break;
           }
         }
       }
@@ -755,6 +810,8 @@ function generateSchedule(grade) {
 
   return schedule;
 }
+
+
 function generateCombinedTimetable() {
   const output = document.getElementById('combined-timetable');
   output.innerHTML = '';
@@ -870,30 +927,33 @@ function showCustomAlert(message, color) {
   }, 3000);
 }
 
-
 function printCombinedTimetable() {
   const term = document.getElementById("term-selector")?.value || "Term 1";
-  const logoURL = "https://i.imgur.com/uWrz8rt.png"; // Replace with your actual logo path
+  const logoURL = "https://i.imgur.com/55WxXPp.png ";
 
   const headerHTML = `
     <div style="text-align:center; margin-bottom: 20px;">
       <img src="${logoURL}" alt="School Logo" style="height: 80px; margin-bottom: 10px;"><br>
-      <h2 style="margin: 0; font-family: Arial;">NACHU JUNIOR SCHOOL</h2>
-      <h3 style="margin: 0; font-family: Arial;">MASTER TIMETABLE 2025</h3>
-      <p style="font-family: Arial;"><strong>TERM:</strong> ${term}</p>
+      <h2 style="margin: 0; font-family: Arial; color: black;">NACHU JUNIOR  SCHOOL</h2>
+      <h3 style="margin: 0; font-family: Arial; color: black;">MASTER TIMETABLE 2025</h3>
+      <p style="font-family: Arial; color: black;"><strong>TERM:</strong> ${term}</p>
     </div>
   `;
 
-  // Get the timetable HTML
-  const timetable = document.getElementById('combined-timetable');
+  const footerHTML = `
+    <div style="margin-top: 30px; text-align: center; font-size: 12px; font-family: Arial; color: black;">
+      <hr style="margin: 20px auto; border: none; border-top: 1px solid #000; width: 80%;">
+      <strong>POWERED BY RASM TECHNOLOGIES - YOUR NUMBER ONE SCHOOL MANAGEMENT SOFTWARE</strong>
+    </div>
+  `;
 
-  // Clone and apply inline styles
+  const timetable = document.getElementById('combined-timetable');
   const clonedTable = timetable.cloneNode(true);
   clonedTable.setAttribute("style", "width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;");
 
   const ths = clonedTable.querySelectorAll("th");
   ths.forEach(th => {
-    th.setAttribute("style", "background-color: #4CAF50; color: white; border: 1px solid #333; padding: 6px; text-align: center;");
+    th.setAttribute("style", "background-color: #4CAF50; color: black; border: 1px solid #333; padding: 6px; text-align: center;");
   });
 
   const tds = clonedTable.querySelectorAll("td");
@@ -904,21 +964,21 @@ function printCombinedTimetable() {
     else if (text === "lunch") bg = "#ffeeba";
     else if (text === "games") bg = "#ffeeba";
 
-    td.setAttribute("style", `border: 1px solid #333; padding: 6px; text-align: center; font-family: Arial;${bg ? " background-color: " + bg + "; font-weight: bold;" : ""}`);
+    td.setAttribute("style", `color: black; border: 1px solid #333; padding: 6px; text-align: center; font-family: Arial;${bg ? " background-color: " + bg + "; font-weight: bold;" : ""}`);
   });
 
-  // Open new window for printing
   const printWindow = window.open('', '', 'height=900,width=1200');
   printWindow.document.write('<html><head><title>Print Timetable</title></head><body style="margin:0; padding:20px;">');
   printWindow.document.write(headerHTML);
   printWindow.document.write(clonedTable.outerHTML);
+  printWindow.document.write(footerHTML);
   printWindow.document.write('</body></html>');
-
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
   printWindow.close();
 }
+
 function toggleGradeSelector() {
     const container = document.getElementById("grade-container");
     container.style.display = (container.style.display === "none") ? "block" : "none";
@@ -1109,7 +1169,7 @@ function showCustomAlert(message, color) {
 function extractFromCombinedTimetable() {
   const combined = document.querySelector("#combined-timetable table");
   if (!combined) {
-    return showAlert("Rasm Did Not Find Any timetable!", "error");
+    return showAlert("Combined timetable not found!", "error");
   }
 
   const rows = Array.from(combined.querySelectorAll("tbody tr"));
@@ -1181,25 +1241,21 @@ function extractFromCombinedTimetable() {
 function showAlert(message, type) {
   const alertBox = document.createElement("div");
   alertBox.textContent = message;
-  alertBox.style.padding = "10px 20px";
-  alertBox.style.borderRadius = "5px";
+  alertBox.style.padding = "5px";
+  alertBox.style.margin = "5px 0";
+  alertBox.style.borderRadius = "3px";
   alertBox.style.fontSize = "16px";
   alertBox.style.backgroundColor = "#d32f2f"; // Red background
-  alertBox.style.color = "white"; // White text
-  alertBox.style.border = "1px solid #b71c1c";
-  alertBox.style.position = "fixed";
-  alertBox.style.top = "50%";
-  alertBox.style.left = "50%";
-  alertBox.style.transform = "translate(-50%, -50%)";
-  alertBox.style.zIndex = "1000"; // Make sure it's on top
+  alertBox.style.color = "white"; // White text color
+  alertBox.style.border = "1px solid #b71c1c"; // Dark red border
 
   document.body.appendChild(alertBox);
 
+  // Remove the alert after 3 seconds
   setTimeout(() => {
     alertBox.remove();
   }, 3000);
 }
-
 
 function buildTable(schedule, headers) {
   let html = `<div style="overflow-x:auto;"><table style="border-collapse: collapse; width: 100%; font-size: 12px;"><thead><tr><th style="border: 1px solid #000; padding: 6px;">Day</th>`;
@@ -1219,20 +1275,26 @@ function buildTable(schedule, headers) {
   html += '</tbody></table></div>';
   return html;
 }
-
- function printThisTimetable(button) {
+function printThisTimetable(button) {
   const timetableBlock = button.closest(".extracted-block").cloneNode(true);
   timetableBlock.querySelector("button").remove();
 
-  const logoURL = "https://i.imgur.com/uWrz8rt.png";
+  const logoURL = " https://i.imgur.com/55WxXPp.png";
   const headerText = timetableBlock.querySelector("h3")?.innerText || "Timetable";
   const isClass = headerText.toLowerCase().includes("class timetable");
 
   const headerHTML = `
     <div style="text-align: center; margin-bottom: 20px;">
       <img src="${logoURL}" style="height: 80px; margin-bottom: 10px;"><br>
-      <h2 style="margin: 0; font-size: 24px; font-family: Arial; font-weight: bold;">NACHU JUNIOR SCHOOL</h2>
-      <h3 style="margin: 0; font-size: 18px; font-family: Arial; font-weight: bold;">${headerText}</h3>
+      <h2 style="margin: 0; font-size: 24px; font-family: Arial; font-weight: bold; color: black;">NACHU JUNIOR  SCHOOL</h2>
+      <h3 style="margin: 0; font-size: 18px; font-family: Arial; font-weight: bold; color: black;">${headerText}</h3>
+    </div>
+  `;
+
+  const footerHTML = `
+    <div style="margin-top: 30px; text-align: center; font-size: 12px; font-family: Arial; color: black;">
+      <hr style="margin: 20px auto; border: none; border-top: 1px solid #000; width: 80%;">
+      <strong>POWERED BY RASM TECHNOLOGIES - YOUR NUMBER ONE SCHOOL MANAGEMENT SOFTWARE</strong>
     </div>
   `;
 
@@ -1242,9 +1304,10 @@ function buildTable(schedule, headers) {
   table.style.borderCollapse = "collapse";
   table.style.fontFamily = "Arial, sans-serif";
   table.style.fontSize = "12pt";
-  table.style.tableLayout = "fixed"; // Important to make it fit
+  table.style.tableLayout = "fixed";
   table.style.wordWrap = "break-word";
   table.style.overflowWrap = "break-word";
+  table.style.color = "black";
 
   table.querySelectorAll("th").forEach(th => {
     th.style.border = "2px solid black";
@@ -1252,6 +1315,7 @@ function buildTable(schedule, headers) {
     th.style.fontWeight = "bold";
     th.style.backgroundColor = "#f1f1f1";
     th.style.textAlign = "center";
+    th.style.color = "black";
   });
 
   table.querySelectorAll("td").forEach(td => {
@@ -1260,6 +1324,7 @@ function buildTable(schedule, headers) {
     td.style.textAlign = "center";
     td.style.wordWrap = "break-word";
     td.style.overflowWrap = "break-word";
+    td.style.color = "black";
   });
 
   const printCSS = `
@@ -1272,19 +1337,22 @@ function buildTable(schedule, headers) {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
+        color: black;
       }
       table {
         width: 100%;
         table-layout: fixed;
+        color: black;
       }
       th, td {
         word-wrap: break-word;
         overflow-wrap: break-word;
+        color: black;
       }
       ${isClass ? `
         .print-block {
           page-break-inside: avoid;
-          transform: scale(0.98); /* Subtle shrink to fit page */
+          transform: scale(0.98);
           transform-origin: top left;
         }
       ` : ''}
@@ -1293,13 +1361,14 @@ function buildTable(schedule, headers) {
 
   const printWindow = window.open('', '', 'width=1000,height=800');
   printWindow.document.write(`<html><head><title>Print Timetable</title>${printCSS}</head><body>`);
-  printWindow.document.write(`<div class="print-block">${headerHTML}${timetableBlock.innerHTML}</div>`);
+  printWindow.document.write(`<div class="print-block">${headerHTML}${timetableBlock.innerHTML}${footerHTML}</div>`);
   printWindow.document.write('</body></html>');
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
   printWindow.close();
 }
+
 </script>
  
 </body>
