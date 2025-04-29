@@ -474,16 +474,29 @@ window.onload = function () {
     document.getElementById('assign-grade').addEventListener('change', e => createAssignDropdown(e.target.value, false));
     document.getElementById('wiz-assign-grade').addEventListener('change', e => createAssignDropdown(e.target.value, true));
 
-    function createAssignDropdown(grade, wizard = false) {
-      const div = document.getElementById(wizard ? 'wiz-subject-assignment' : 'subject-assignment');
-      div.innerHTML = '';
-      [...subjects.daily, ...subjects.fourPerWeek].forEach(subj => {
-        const sel = document.createElement('select');
-        sel.id = `${wizard ? 'wiz-' : ''}g${grade}-${subj}`;
-        sel.innerHTML = '<option disabled selected>Select teacher</option>' + teachers.map(t => `<option value="${t.id}">${subj} - ${t.name} (T${t.id})</option>`).join(' ');
-        div.appendChild(sel);
-      });
-    }
+function createAssignDropdown(grade, wizard = false) {
+  const div = document.getElementById(wizard ? 'wiz-subject-assignment' : 'subject-assignment');
+  div.innerHTML = '';
+
+  [...subjects.daily, ...subjects.fourPerWeek].forEach(subj => {
+    const sel = document.createElement('select');
+    sel.id = `${wizard ? 'wiz-' : ''}g${grade}-${subj}`;
+    sel.style.margin = '5px 0';
+    sel.style.padding = '6px';
+    sel.style.width = '100%';
+    sel.style.borderRadius = '4px';
+    sel.style.border = '1px solid #ccc';
+    sel.style.backgroundColor = '#fefefe';
+
+    // First option now includes the subject name
+    sel.innerHTML = `<option value="" disabled selected>Select teacher for ${subj}</option>` +
+      teachers.map(t =>
+        `<option value="${t.id}">${subj} - ${t.name} (T${t.id})</option>`
+      ).join('');
+
+    div.appendChild(sel);
+  });
+}
 
  function saveAssignments(wizard = false) {
   const grade = document.getElementById(wizard ? 'wiz-assign-grade' : 'assign-grade').value;
