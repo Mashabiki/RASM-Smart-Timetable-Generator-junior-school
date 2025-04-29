@@ -552,8 +552,8 @@ function generateSchedule(grade) {
   const assign = assignments[grade];
   if (!assign) return null;
 
-  const mathPeriodsOnly = [0, 1, 2, 3, 4, 5, 6, 7]; // Mathematics only between 8:00–12:55
-  const allowedPeriodsFor = (subj) => subj === 'Mathematics' ? mathPeriodsOnly : null;
+  const mathsPeriodsOnly = [0, 1,  3, 4, 6, 7]; // Maths only between 8:00–12:55
+  const allowedPeriodsFor = (subj) => subj === 'Maths' ? mathsPeriodsOnly : null;
 
   const doubleLessonSubjects = ['Integrated Science', 'Pre-Technical', 'Agriculture', 'Creative Arts & Sports'];
   const doubleLessonPlaced = {};
@@ -643,25 +643,24 @@ function generateSchedule(grade) {
   assignedSubjects.forEach(s => subjectPlacedCount[s] = 0);
 
   // STEP 1: Place double lessons
-doubleLessonSubjects.forEach(subj => {
-  const tid = assign[subj];
-  const doubleSlot = findDoubleFreeSlot(tid, subj);
-  if (doubleSlot) {
-    const label = `${subj} (T${tid})`;
-    const styledCell = `<div style="background-color: #bbdefb; padding: 4px;">${label}</div>`; // Yellow highlight
+  doubleLessonSubjects.forEach(subj => {
+    const tid = assign[subj];
+    const doubleSlot = findDoubleFreeSlot(tid, subj);
+    if (doubleSlot) {
+      const label = `${subj} (T${tid})`;
+      const styledCell = `<div style="background-color: #bbdefb; padding: 4px;">${label}</div>`; // Yellow highlight
 
-    schedule[doubleSlot.day][doubleSlot.period] = styledCell;
-    schedule[doubleSlot.day][doubleSlot.period + 1] = styledCell;
+      schedule[doubleSlot.day][doubleSlot.period] = styledCell;
+      schedule[doubleSlot.day][doubleSlot.period + 1] = styledCell;
 
-    occupy(tid, doubleSlot.day, doubleSlot.period + 1);
-    occupy(tid, doubleSlot.day, doubleSlot.period + 2);
+      occupy(tid, doubleSlot.day, doubleSlot.period + 1);
+      occupy(tid, doubleSlot.day, doubleSlot.period + 2);
 
-    subjectPlacedCount[subj] += 2;
-    doubleLessonPlaced[subj] = true;
-    doubleLessonDays.add(doubleSlot.day);
-  }
-});
-
+      subjectPlacedCount[subj] += 2;
+      doubleLessonPlaced[subj] = true;
+      doubleLessonDays.add(doubleSlot.day);
+    }
+  });
 
   // STEP 2: Place regular lessons
   assignedSubjects.forEach(subj => {
@@ -687,7 +686,7 @@ doubleLessonSubjects.forEach(subj => {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
-          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
+          if (subj === 'Maths' && !mathsPeriodsOnly.includes(p)) continue;
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
           if (
@@ -711,7 +710,7 @@ doubleLessonSubjects.forEach(subj => {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
-          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
+          if (subj === 'Maths' && !mathsPeriodsOnly.includes(p)) continue;
           const tid = assign[subj];
           const maxCount = allSubjectsPerWeek[subj];
           if (subjectPlacedCount[subj] < maxCount && isFree(tid, day, p + 1)) {
@@ -763,7 +762,7 @@ doubleLessonSubjects.forEach(subj => {
     for (let p of lessonSlots) {
       if (!schedule[day][p]) {
         for (let subj of assignedSubjects) {
-          if (subj === 'Mathematics' && !mathPeriodsOnly.includes(p)) continue;
+          if (subj === 'Maths' && !mathsPeriodsOnly.includes(p)) continue;
           const tid = assign[subj];
           if (isFree(tid, day, p + 1)) {
             schedule[day][p] = `${subj} (T${tid})`;
@@ -777,6 +776,7 @@ doubleLessonSubjects.forEach(subj => {
 
   return schedule;
 }
+
 
 
 function generateCombinedTimetable() {
@@ -795,76 +795,96 @@ function generateCombinedTimetable() {
   selected.forEach(grade => {
     allSchedules[grade] = generateSchedule(grade);
   });
+const wrapper = document.createElement('div');
+wrapper.className = 'mb-8 p-4 border shadow-md rounded-2xl bg-white overflow-auto';
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'mb-8 p-4 border shadow-md rounded-2xl bg-white overflow-auto';
+// ?? Define row colors per grade (will cycle through if more grades than colors)
+const gradeColors = [
+  '#f8f9fa', // light gray
+  '#e0f7fa', // cyan
+  '#f1f8e9', // light green
+  '#fff3e0', // orange
+  '#fce4ec', // pink
+  '#ede7f6', // light purple
+  '#e8f5e9', // mint
+  '#fffde7', // yellow
+  '#e3f2fd', // light blue
+];
 
-  let html = `
-    <style>
-      #combined-timetable table, 
-      #combined-timetable th, 
-      #combined-timetable td {
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-      #combined-timetable th, 
-      #combined-timetable td {
-        padding: 8px;
-        text-align: center;
-      }
-      #combined-timetable thead {
-        background-color: #f1f1f1;
-        font-weight: bold;
-      }
-      .break-cell {
-        background-color: #ffeeba;
-      }
-      .lunch-cell {
-        background-color: #c3e6cb;
-      }
-      .games-cell {
-        background-color: #bee5eb;
-      }
-    </style>
+let html = `
+  <style>
+    #combined-timetable table, 
+    #combined-timetable th, 
+    #combined-timetable td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    #combined-timetable th, 
+    #combined-timetable td {
+      padding: 8px;
+      text-align: center;
+    }
+    #combined-timetable thead {
+      background-color: #f1f1f1;
+      font-weight: bold;
+    }
+    .break-cell {
+      background-color: #ffeeba;
+    }
+    .lunch-cell {
+      background-color: #c3e6cb;
+    }
+    .games-cell {
+      background-color: #bee5eb;
+    }
+  </style>
 
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-bold text-white bg-red-600 px-4 py-2 rounded shadow-md">
-        <i class="fas fa-calendar-alt mr-2"></i> Generated Master Timetable Is Here
-      </h3>
-    </div>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-bold text-white bg-red-600 px-4 py-2 rounded shadow-md">
+      <i class="fas fa-calendar-alt mr-2"></i> Generated Master Timetable Is Here
+    </h3>
+  </div>
 
-    <table class="w-full text-sm">
-      <thead>
-        <tr>
-          <th>Day</th>
-          <th>Grade</th>`;
+  <table class="w-full text-sm">
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Grade</th>`;
 
-  periods.forEach(t => {
-    html += `<th>${t}</th>`;
-  });
+periods.forEach(t => {
+  html += `<th>${t}</th>`;
+});
 
-  html += `</tr></thead><tbody>`;
+html += `</tr></thead><tbody>`;
 
-  days.forEach(day => {
-    Object.entries(allSchedules).forEach(([grade, schedule]) => {
-      html += `<tr><td>${day}</td><td>${grade}</td>`;
-      schedule[day].forEach(subject => {
-        const lower = subject.toLowerCase();
-        let cellClass = '';
-        if (lower.includes('break')) cellClass = 'break-cell';
-        else if (lower.includes('lunch')) cellClass = 'lunch-cell';
-        else if (lower.includes('games')) cellClass = 'games-cell';
-        html += `<td class="${cellClass}">${subject}</td>`;
-      });
-      html += `</tr>`;
+// ?? Color each grade consistently using color index
+const gradeColorMap = {};
+let colorIndex = 0;
+Object.keys(allSchedules).forEach(grade => {
+  gradeColorMap[grade] = gradeColors[colorIndex % gradeColors.length];
+  colorIndex++;
+});
+
+days.forEach(day => {
+  Object.entries(allSchedules).forEach(([grade, schedule]) => {
+    const bgColor = gradeColorMap[grade];
+    html += `<tr style="background-color: ${bgColor};"><td>${day}</td><td>${grade}</td>`;
+    schedule[day].forEach(subject => {
+      const lower = subject.toLowerCase();
+      let cellClass = '';
+      if (lower.includes('break')) cellClass = 'break-cell';
+      else if (lower.includes('lunch')) cellClass = 'lunch-cell';
+      else if (lower.includes('games')) cellClass = 'games-cell';
+      html += `<td class="${cellClass}">${subject}</td>`;
     });
+    html += `</tr>`;
   });
+});
 
-  html += `</tbody></table>`;
-  wrapper.innerHTML = html;
-  output.appendChild(wrapper);
+html += `</tbody></table>`;
+wrapper.innerHTML = html;
+output.appendChild(wrapper);
 }
-
 function showCustomAlert(message, color) {
   const alertBox = document.createElement('div');
   alertBox.className = 'custom-alert';
@@ -1204,33 +1224,60 @@ function extractFromCombinedTimetable() {
       </div>`;
   }
 }
-
-function showAlert(message, type) {
+function showAlert(message, type = "error") {
   const alertBox = document.createElement("div");
-  alertBox.textContent = message;
 
+  // Icon class & colors
+  let iconClass = "fa-circle-exclamation";
+  let bgColor = "#d32f2f";
+  let borderColor = "#b71c1c";
+
+  if (type === "success") {
+    iconClass = "fa-circle-check";
+    bgColor = "#4CAF50";
+    borderColor = "#388E3C";
+  } else if (type === "warning") {
+    iconClass = "fa-triangle-exclamation";
+    bgColor = "#FF9800";
+    borderColor = "#EF6C00";
+  }
+
+  alertBox.innerHTML = `
+    <i class="fas ${iconClass}" style="margin-right: 10px;"></i>${message}
+  `;
+
+  // Styling
   alertBox.style.position = "fixed";
   alertBox.style.top = "50%";
   alertBox.style.left = "50%";
   alertBox.style.transform = "translate(-50%, -50%)";
-
-  alertBox.style.padding = "15px 30px";
+  alertBox.style.padding = "16px 30px";
   alertBox.style.margin = "0";
-  alertBox.style.borderRadius = "8px";
+  alertBox.style.borderRadius = "10px";
   alertBox.style.fontSize = "16px";
   alertBox.style.fontWeight = "bold";
   alertBox.style.textAlign = "center";
   alertBox.style.zIndex = "9999";
-
-  // Styling based on alert type (can be extended if needed)
-  alertBox.style.backgroundColor = "#d32f2f"; // Red background
+  alertBox.style.backgroundColor = bgColor;
   alertBox.style.color = "white";
-  alertBox.style.border = "2px solid #b71c1c";
+  alertBox.style.border = `2px solid ${borderColor}`;
+  alertBox.style.boxShadow = "0px 4px 12px rgba(0, 0, 0, 0.3)";
+  alertBox.style.opacity = "0";
+  alertBox.style.transition = "opacity 0.5s ease";
 
   document.body.appendChild(alertBox);
 
+  // Fade in
   setTimeout(() => {
-    alertBox.remove();
+    alertBox.style.opacity = "1";
+  }, 10);
+
+  // Fade out and remove
+  setTimeout(() => {
+    alertBox.style.opacity = "0";
+    setTimeout(() => {
+      alertBox.remove();
+    }, 500);
   }, 3000);
 }
 
